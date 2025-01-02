@@ -7,6 +7,10 @@ const getUserByID = () => {
   return CinemaDBRep.getAllUsers();
 };
 
+const getUserAuth = () => {
+  return CinemaDBRep.getUserAuth();
+};
+
 const addUser = (user) => {
   return CinemaDBRep.addUser(user);
 };
@@ -20,6 +24,7 @@ const deleteUser = (id) => {
 module.exports = {
   getAllUsers,
   getUserByID,
+  getUserAuth,
   addUser,
   updateUser,
   deleteUser,

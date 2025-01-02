@@ -7,6 +7,10 @@ const getAllUserByID = (id) => {
   return User.findById(id);
 };
 
+const getUserAuth = (userName, password) => {
+  return User.findOne({ userName: userName, password: password });
+};
+
 const addUser = async (user) => {
   const newUser = new User(user);
   await newUser.save();
@@ -25,6 +29,7 @@ const deleteUser = async (id) => {
 module.exports = {
   getAllUsers,
   getAllUserByID,
+  getUserAuth,
   addUser,
   updateUser,
   deleteUser,

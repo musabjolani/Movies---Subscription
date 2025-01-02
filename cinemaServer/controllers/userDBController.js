@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userServ = require("../services/userServ");
+const jwt = require("jsonwebtoken");
 
 router.get("/", async (req, res) => {
   try {
@@ -27,6 +28,22 @@ router.post("/", async (req, res) => {
     res.status(404).json(error.message);
   }
 });
+
+router.post("/", async (req, res) => {
+  const { userName, password } = req.body;
+
+  // if 'username' and 'password' are exist in the DB
+  const user = await userServ.getUserAuth(userName, password);
+
+  if (user) {
+    const userId = "IIhjjkuiuijk";
+    const SECRET_KEY = "1982738aksjldjasdl";
+    const token = jwt.sign({ id: userId }, SECRET_KEY, { expiresIn: "1h" });
+    res.json({ token });
+  } else return res.json({ token: "" });
+});
+
+module.exports = router;
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
