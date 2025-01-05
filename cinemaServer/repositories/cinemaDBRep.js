@@ -7,8 +7,8 @@ const getAllUserByID = (id) => {
   return User.findById(id);
 };
 
-const getUserAuth = (userName, password) => {
-  return User.findOne({ userName: userName, password: password });
+const getUserAuth = (userName) => {
+  return User.findOne({ userName: userName });
 };
 
 const addUser = async (user) => {

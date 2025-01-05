@@ -4,8 +4,9 @@ const connectDB = require("./config/db");
 const userRouter = require("./controllers/userController");
 const permissionRouter = require("./controllers/permissionController");
 const userDBController = require("./controllers/userDBController");
+const dotenv = require("dotenv").config();
 
-const PORT = 3300;
+const PORT = process.env.PORT;
 const app = express();
 
 app.use(cors());

@@ -2,14 +2,23 @@ const express = require("express");
 const router = express.Router();
 const userServ = require("../services/userServ");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const dotenv = require("dotenv").config();
+const authMiddleware = require("../middleware/authMiddleware");
+const rolesMiddleware = require("../middleware/rolesMiddleware");
 
-router.get("/", async (req, res) => {
-  try {
-    res.json(await userServ.getAllUsers());
-  } catch (error) {
-    res.json(res.status(404).json(error.message));
+router.get(
+  "/",
+  authMiddleware.varifyToken,
+  rolesMiddleware.OnlyAdminRole(true),
+  async (req, res) => {
+    try {
+      res.json(await userServ.getAllUsers());
+    } catch (error) {
+      res.json(res.status(404).json(error.message));
+    }
   }
-});
+);
 
 router.get("/:id", async (req, res) => {
   try {
@@ -29,21 +38,38 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/login", async (req, res) => {
   const { userName, password } = req.body;
-
-  // if 'username' and 'password' are exist in the DB
-  const user = await userServ.getUserAuth(userName, password);
-
-  if (user) {
+  try {
+    // if 'username' is exist in the DB
+    const user = await userServ.getUserAuth(userName);
+    console.log(user);
+    if (!user) return res.status(401).json({ message: "Invalid userName" });
+    if (!(await bcrypt.compare(password, user.password)))
+      return res.status(401).json({ message: "Invalid password" });
     const userId = "IIhjjkuiuijk";
-    const SECRET_KEY = "1982738aksjldjasdl";
-    const token = jwt.sign({ id: userId }, SECRET_KEY, { expiresIn: "1h" });
+    const SECRET_KEY = process.env.JWT_SECRET_KEY;
+    const token = jwt.sign(
+      { userName: user.userName, isAdmin: user.isAdmin },
+      SECRET_KEY,
+      { expiresIn: "1h" }
+    );
     res.json({ token });
-  } else return res.json({ token: "" });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
+router.post("/register", async (req, res) => {
+  try {
+    const user = req.body;
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    user.password = hashedPassword;
+    res.json(await userServ.addUser(user));
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 });
 
-module.exports = router;
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
