@@ -7,8 +7,8 @@ const getUserByID = () => {
   return CinemaDBRep.getAllUsers();
 };
 
-const getUserAuth = () => {
-  return CinemaDBRep.getUserAuth();
+const getUserAuth = (userName) => {
+  return CinemaDBRep.getUserAuth(userName);
 };
 
 const addUser = (user) => {
