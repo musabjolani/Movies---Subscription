@@ -43,11 +43,9 @@ router.post("/login", async (req, res) => {
   try {
     // if 'username' is exist in the DB
     const user = await userServ.getUserAuth(userName);
-    console.log(user);
     if (!user) return res.status(401).json({ message: "Invalid userName" });
     if (!(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ message: "Invalid password" });
-    const userId = "IIhjjkuiuijk";
     const SECRET_KEY = process.env.JWT_SECRET_KEY;
     const token = jwt.sign(
       { userName: user.userName, isAdmin: user.isAdmin },
@@ -62,6 +60,9 @@ router.post("/login", async (req, res) => {
 router.post("/register", async (req, res) => {
   try {
     const user = req.body;
+    const UserExist = await userServ.getUserAuth(user.userName);
+    if (UserExist)
+      return res.status(401).json({ message: "userName ia already exist" });
     const hashedPassword = await bcrypt.hash(user.password, 10);
     user.password = hashedPassword;
     res.json(await userServ.addUser(user));
