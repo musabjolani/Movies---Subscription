@@ -10,11 +10,14 @@ const getPermissionByID = async (id) => {
   return Permissions.filter((Permission) => Permission.id === id);
 };
 
-const addPermission = async (Permission) => {
-  const Permissions = await fileJSONRep.getAllFileData(filePath);
+const addPermission = async (userWithPermissions) => {
+  const permissionsArr = await fileJSONRep.getAllFileData(filePath);
   return await fileJSONRep.updateFile(filePath, [
-    ...Permissions,
-    { ...Permission, id: uuidv4() },
+    ...permissionsArr,
+    {
+      id: userWithPermissions.id,
+      permissions: userWithPermissions.permissions,
+    },
   ]);
 };
 

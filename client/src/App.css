@@ -2,7 +2,12 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+}
+
+.label {
+  margin: 8px 8px 0px 5px;
+  width: 100px;
+  display: inline-block;
 }
 
 .logo {

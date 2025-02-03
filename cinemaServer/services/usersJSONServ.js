@@ -12,10 +12,9 @@ const getUserByID = async (id) => {
 
 const addUser = async (user) => {
   const users = await fileJSONRep.getAllFileData(filePath);
-  return await fileJSONRep.updateFile(filePath, [
-    ...users,
-    { ...user, id: uuidv4() },
-  ]);
+  const newUser = { ...user, id: uuidv4() };
+  await fileJSONRep.updateFile(filePath, [...users, newUser]);
+  return newUser;
 };
 
 const updateUser = async (id, user) => {

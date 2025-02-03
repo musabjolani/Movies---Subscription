@@ -9,7 +9,6 @@ const getAllFileData = async (filePath) => {
 };
 
 const updateFile = async (filePath, data) => {
-  console.log("data", data);
   await jsonFile.writeFile(filePath, data);
   return "File Updated";
 };
