@@ -24,10 +24,11 @@ const addPermission = async (userWithPermissions) => {
 const updatePermission = async (id, Permission) => {
   const Permissions = await fileJSONRep.getAllFileData(filePath);
   const index = Permissions.findIndex((Permission) => Permission.id === id);
-  if (index === -1) return "Permission Not Found";
+  if (index === -1) throw error;
   Permissions[index] = Permission;
   return await fileJSONRep.updateFile(filePath, Permissions);
 };
+
 const deletePermission = async (id) => {
   const Permissions = await fileJSONRep.getAllFileData(filePath);
   const PermissionsWithoutDletedPermission = Permissions.filter(

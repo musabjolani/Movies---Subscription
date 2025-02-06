@@ -21,11 +21,15 @@ const updateUserByID = (id, user) => {
   return CinemaDBRep.updateUserByID(id, user);
 };
 const updateUserByUserId = async (userId, user) => {
-  const data = await getUserByUserId(userId);
-  return updateUserByID(data._id, user);
+  const existingUser = await getUserByUserId(userId);
+  if (existingUser?._id) return updateUserByID(existingUser._id, user);
+  throw error;
 };
-const deleteUser = (id) => {
-  return CinemaDBRep.deleteUser(id);
+
+const deleteUserByUserId = async (userId) => {
+  const existingUser = await getUserByUserId(userId);
+  if (existingUser?._id) return CinemaDBRep.deleteUser(existingUser._id);
+  throw error;
 };
 
 module.exports = {
@@ -36,5 +40,5 @@ module.exports = {
   addUser,
   updateUserByID,
   updateUserByUserId,
-  deleteUser,
+  deleteUserByUserId,
 };

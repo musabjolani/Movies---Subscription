@@ -6,6 +6,7 @@ import { Route, Routes } from "react-router-dom";
 import UsersManagement from "./components/UsersManagement";
 import AddUser from "./components/AddUser";
 import UpdateUser from "./components/UpdateUser";
+import AllUsers from "./components/AllUsers";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="usersmanagement" element={<UsersManagement />}>
             <Route path="adduser" element={<AddUser />}></Route>
             <Route path="updateuser/:userId" element={<UpdateUser />}></Route>
+            <Route path="allusers" element={<AllUsers />}></Route>
           </Route>
         </Route>
       </Routes>

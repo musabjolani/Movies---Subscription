@@ -16,8 +16,8 @@ const postData = async (url, data) => {
 const updateById = async (url, data) => {
   await axios.put(url, data);
 };
-const deleteById = async (url, id) => {
-  await axios.delete(url, id);
+const deleteById = async (url) => {
+  await axios.delete(url);
 };
 
 export { getAll, postData, updateById, deleteById };

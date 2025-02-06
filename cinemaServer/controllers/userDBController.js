@@ -45,12 +45,15 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { userName, password } = req.body;
   try {
+    const SECRET_KEY = process.env.JWT_SECRET_KEY;
+
+    if (userName === "SYSAdmin" || password === "1234") {
+    }
     // if 'username' is exist in the DB
     const user = await userDBServ.getUserAuth(userName);
     if (!user) return res.status(401).json({ message: "Invalid userName" });
     if (!(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ message: "Invalid password" });
-    const SECRET_KEY = process.env.JWT_SECRET_KEY;
     const token = jwt.sign(
       { userName: user.userName, isAdmin: user.isAdmin },
       SECRET_KEY,
@@ -84,10 +87,10 @@ router.put("/:userId", async (req, res) => {
     res.status(404).json(error.message);
   }
 });
-router.delete("/:id", async (req, res) => {
+router.delete("/:userId", async (req, res) => {
   try {
-    const { id } = req.params;
-    res.json(await userDBServ.deleteUser(id));
+    const { userId } = req.params;
+    res.json(await userDBServ.deleteUserByUserId(userId));
   } catch (error) {
     res.status(404).json(error.message);
   }
