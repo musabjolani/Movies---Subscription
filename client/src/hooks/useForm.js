@@ -6,6 +6,11 @@ const useForm = (modelObject, schemaName) => {
   const [errors, setErrors] = useState({});
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
+  const resetForm = () => {
+    setValues(modelObject);
+    setIsFormSubmitted(false);
+  };
+
   useEffect(() => {
     setErrors(validateData(schemaName, values));
   }, [values]);
@@ -23,6 +28,7 @@ const useForm = (modelObject, schemaName) => {
     errors,
     isFormSubmitted,
     setIsFormSubmitted,
+    resetForm,
   };
 };
 export default useForm;

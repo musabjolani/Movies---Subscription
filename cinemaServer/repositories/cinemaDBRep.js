@@ -3,8 +3,11 @@ const User = require("../models/userModel");
 const getAllUsers = () => {
   return User.find();
 };
-const getAllUserByID = (id) => {
+const getUserByID = (id) => {
   return User.findById(id);
+};
+const getUserByUserId = (userId) => {
+  return User.findOne({ userId: userId });
 };
 
 const getUserAuth = (userName) => {
@@ -17,7 +20,7 @@ const addUser = async (user) => {
   return "User Added ";
 };
 
-const updateUser = async (id, user) => {
+const updateUserByID = async (id, user) => {
   await User.findByIdAndUpdate(id, user);
   return "User Updated";
 };
@@ -28,9 +31,11 @@ const deleteUser = async (id) => {
 
 module.exports = {
   getAllUsers,
-  getAllUserByID,
+  getUserByID,
+  getUserByUserId,
   getUserAuth,
   addUser,
-  updateUser,
+  updateUserByID,
+
   deleteUser,
 };

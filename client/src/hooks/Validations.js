@@ -1,11 +1,23 @@
-import Joi from "joi-browser";
+import Joi from "joi";
 
 const schemas = {
-  loginSchema: {
+  loginSchema: Joi.object({
     userName: Joi.string().required().label("User Name"),
     password: Joi.string().required().label("Password"),
-  },
-  // Add more schemas here
+  }),
+
+  addUserSchema: Joi.object({
+    firstName: Joi.string().required().label("First Name"),
+    lastName: Joi.string().required().label("Last Name"),
+    userName: Joi.string().required().label("User Name"),
+    sessionTimeOut: Joi.number().positive().label("Session Time Out"),
+    createdDate: Joi.string()
+      .pattern(/^([1-9]|0[1-9]|[12][0-9]|3[01])\/([1-9]|0[1-9]|1[0-2])\/\d{4}$/) // Ensuring DD_MM-YYYY format
+      .required()
+      .label("Created Date"),
+    permissions: Joi.any(),
+    id: Joi.any(),
+  }),
 };
 
 const validateData = (schemaName, data) => {
@@ -23,9 +35,7 @@ const validateData = (schemaName, data) => {
   const validationSchema = schemas[schemaName];
 
   // Validate the data
-  const { error } = Joi.validate(data, validationSchema, {
-    abortEarly: false, // Collect all errors, not just the first one
-  });
+  const { error } = validationSchema.validate(data, { abortEarly: false });
   let errors = {};
   // If there are errors, return them in a structured format
   if (error) {
