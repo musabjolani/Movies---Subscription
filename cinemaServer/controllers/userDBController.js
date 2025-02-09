@@ -3,9 +3,10 @@ const router = express.Router();
 const userDBServ = require("../services/userDBServ");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const dotenv = require("dotenv").config();
 const authMiddleware = require("../middleware/authMiddleware");
 const rolesMiddleware = require("../middleware/rolesMiddleware");
+
+const SECRET_KEY = process.env.JWT_SECRET_KEY; // Define at the top
 
 router.get(
   "/",
@@ -19,6 +20,10 @@ router.get(
     }
   }
 );
+
+router.get("/getUserInfo", authMiddleware.varifyToken, (req, res) => {
+  res.json({ user: req.user });
+});
 
 router.get("/:userId", async (req, res) => {
   try {
@@ -43,36 +48,62 @@ router.post("/", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { userName, password } = req.body;
   try {
-    const SECRET_KEY = process.env.JWT_SECRET_KEY;
+    const { userName, password } = req.body;
 
-    if (userName === "SYSAdmin" || password === "1234") {
+    // Handle SYSAdmin login (Hardcoded Admin Credentials - Ideally store securely)
+    if (userName.toLowerCase() === "sysadmin" && password === "1234") {
+      const token = jwt.sign({ userName, isAdmin: true }, SECRET_KEY, {
+        expiresIn: "1h",
+      });
+      return res.json(token); //  Return token properly
     }
-    // if 'username' is exist in the DB
+
+    // Retrieve user from DB (Ensure case-insensitive search)
     const user = await userDBServ.getUserAuth(userName);
-    if (!user) return res.status(401).json({ message: "Invalid userName" });
-    if (!(await bcrypt.compare(password, user.password)))
+
+    if (!user) return res.status(401).json({ message: "Invalid username" });
+
+    // Check if the user has a password set (Prompt for reset if missing)
+    if (!user.password) {
+      return res.status(401).json({ message: "Reset password Please" });
+    }
+
+    // Verify password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid password" });
+    }
+
+    // Generate JWT token
     const token = jwt.sign(
-      { userName: user.userName, isAdmin: user.isAdmin },
+      { userName: user.userName, isAdmin: false },
       SECRET_KEY,
-      { expiresIn: "1h" }
+      {
+        expiresIn: "1h",
+      }
     );
-    res.json({ token });
+
+    return res.json(token); // ✅ Return token properly
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    console.error("Login error:", error); // ✅ Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
+module.exports = router;
+
 router.post("/register", async (req, res) => {
   try {
-    const user = req.body;
-    const UserExist = await userDBServ.getUserAuth(user.userName);
-    if (UserExist)
-      return res.status(401).json({ message: "userName ia already exist" });
-    const hashedPassword = await bcrypt.hash(user.password, 10);
-    user.password = hashedPassword;
-    res.json(await userDBServ.addUser(user));
+    const { userName, password } = req.body;
+    const user = await userDBServ.getUserAuth(userName);
+    if (!user)
+      return res.status(401).json({ message: "userName ia not exist" });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    res.json(
+      await userDBServ.updateUserByID(user._id, { password: hashedPassword })
+    );
   } catch (error) {
     res.status(500).json(error.message);
   }

@@ -10,7 +10,6 @@ import {
   Alert,
 } from "@mui/material";
 import { getAll, postData, updateById } from "../Utils/dbUtils";
-import CINEMA_SERVICE_URL from "../Config/config";
 import { useEffect, useState } from "react";
 import hasAllPermissions from "../Utils/permissionUtils";
 import { useParams } from "react-router-dom";
@@ -45,14 +44,10 @@ const UpdateUser = () => {
   useEffect(() => {
     const getUserData = async () => {
       try {
-        const { data: user } = await getAll(
-          `${CINEMA_SERVICE_URL}/users/${userId}`
-        );
-        const { data: userDb } = await getAll(
-          `${CINEMA_SERVICE_URL}/userDB/${userId}`
-        );
+        const { data: user } = await getAll(`/users/${userId}`);
+        const { data: userDb } = await getAll(`/userDB/${userId}`);
         const { data: userPermissions } = await getAll(
-          `${CINEMA_SERVICE_URL}/permissions/${userId}`
+          `/permissions/${userId}`
         );
 
         setValues({
@@ -146,18 +141,12 @@ const UpdateUser = () => {
 
       // Perform updates in parallel
       await Promise.all([
-        updateById(`${CINEMA_SERVICE_URL}/users/${userId}`, userPayload),
-        updateById(
-          `${CINEMA_SERVICE_URL}/userDB/${userId}`,
-          userDBPayload
-        ).catch(async () =>
-          postData(`${CINEMA_SERVICE_URL}/userDB`, userDBPayload)
+        updateById(`/users/${userId}`, userPayload),
+        updateById(`/userDB/${userId}`, userDBPayload).catch(async () =>
+          postData(`/userDB`, userDBPayload)
         ),
-        updateById(
-          `${CINEMA_SERVICE_URL}/permissions/${userId}`,
-          permissionsPayload
-        ).catch(async () =>
-          postData(`${CINEMA_SERVICE_URL}/permissions`, permissionsPayload)
+        updateById(`/permissions/${userId}`, permissionsPayload).catch(
+          async () => postData(`/permissions`, permissionsPayload)
         ),
       ]);
 

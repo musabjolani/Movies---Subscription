@@ -5,7 +5,7 @@ import { deleteById, getAll } from "../Utils/dbUtils";
 import { useNavigate } from "react-router";
 import useForm from "../hooks/useForm";
 import { Link } from "react-router";
-import CINEMA_SERVICE_URL from "../Config/config";
+
 import {
   Alert,
   Box,
@@ -26,11 +26,9 @@ const AllUsers = () => {
   const getAllUsers = async () => {
     let indx = 0;
     let userArr = [];
-    const { data: users } = await getAll(`${CINEMA_SERVICE_URL}/users`);
+    const { data: users } = await getAll(`/users`);
     setUsers(users);
-    const { data: userPermissions } = await getAll(
-      `${CINEMA_SERVICE_URL}/permissions`
-    );
+    const { data: userPermissions } = await getAll(`/permissions`);
 
     userArr = [...users];
 
@@ -52,9 +50,9 @@ const AllUsers = () => {
     try {
       e.preventDefault();
       if (confirm("Are tou sure you want to delete the User ?")) {
-        await deleteById(`${CINEMA_SERVICE_URL}/users/${id}`);
-        await deleteById(`${CINEMA_SERVICE_URL}/permissions/${id}`);
-        await deleteById(`${CINEMA_SERVICE_URL}/userDB/${id}`);
+        await deleteById(`/users/${id}`);
+        await deleteById(`/permissions/${id}`);
+        await deleteById(`/userDB/${id}`);
         getAllUsers();
       }
       // setSuccessMessage("The User Deleted Successfully ");

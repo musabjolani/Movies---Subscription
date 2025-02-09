@@ -1,15 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
-import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Typography,
+} from "@mui/material";
 import useForm from "../hooks/useForm";
-import { postData } from "../Utils/dbUtils";
-import CINEMA_SERVICE_URL from "../Config/config";
+import { getAll, postData } from "../Utils/dbUtils";
+import { useNavigate } from "react-router";
 
 const Register = () => {
-  const [severity, setSeverity] = useState("");
+  let navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const {
     handleInputChange,
+    setValues,
     values,
     setErrors,
     errors,
@@ -23,22 +34,40 @@ const Register = () => {
     "loginSchema"
   );
 
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data } = await getAll(`/userDB/getUserInfo`);
+        setValues({ ...values, userName: data?.user?.userName });
+        setIsAdmin(data?.user?.isAdmin);
+        console.log(data);
+      } catch (error) {}
+    };
+    getUser();
+  }, []);
+
   const registerUser = async (e) => {
     try {
       e.preventDefault();
       setIsFormSubmitted(true);
+      setErrorMessage("");
+      setSuccessMessage("");
       if (errors && Object.keys(errors).length > 0) {
         return;
       }
-      await postData(`${CINEMA_SERVICE_URL}/userDB/register`, values);
-      setSeverity("success");
-      setErrors({ ...errors, Message: "" });
+
+      await postData(
+        `/userDB/register`,
+
+        values
+      );
+
+      setErrorMessage("");
+      setSuccessMessage("The password reset Successfully ");
     } catch (error) {
-      setSeverity("error");
-      setErrors({
-        ...errors,
-        Message: error.response ? error.response.data.message : error.message,
-      });
+      setErrorMessage(
+        error.response ? error.response.data.message : error.message
+      );
     }
   };
 
@@ -68,6 +97,7 @@ const Register = () => {
                 value={values.userName}
                 label="User Name"
                 variant="outlined"
+                disabled={!isAdmin}
                 onChange={(e) => handleInputChange(e)}
                 {...(isFormSubmitted &&
                   errors.userName && {
@@ -89,8 +119,11 @@ const Register = () => {
                   })}
               />
 
-              {errors.Message && (
-                <Alert severity={severity}>{errors.Message}</Alert>
+              {errorMessage && errorMessage != "" && (
+                <Alert severity="error">{errorMessage}</Alert>
+              )}
+              {successMessage && successMessage != "" && (
+                <Alert severity="success">{successMessage}</Alert>
               )}
               <Button
                 variant="contained"

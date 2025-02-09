@@ -10,11 +10,12 @@ import {
   Alert,
 } from "@mui/material";
 import { postData } from "../Utils/dbUtils";
-import CINEMA_SERVICE_URL from "../Config/config";
 import { useEffect, useState } from "react";
 import hasAllPermissions from "../Utils/permissionUtils";
+import { useNavigate } from "react-router";
 
 const AddUser = () => {
+  let navigate = useNavigate();
   const initForm = {
     firstName: "",
     lastName: "",
@@ -94,20 +95,17 @@ const AddUser = () => {
         return;
       }
 
-      const { data: userAdded } = await postData(
-        `${CINEMA_SERVICE_URL}/users`,
-        {
-          firstName: values.firstName,
-          lastName: values.lastName,
-          createdDate: values.createdDate,
-          sessionTimeOut: values.sessionTimeOut,
-        }
-      );
-      await postData(`${CINEMA_SERVICE_URL}/userDB`, {
+      const { data: userAdded } = await postData(`/users`, {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        createdDate: values.createdDate,
+        sessionTimeOut: values.sessionTimeOut,
+      });
+      await postData(`/userDB`, {
         userId: userAdded.id,
         userName: values.userName,
       });
-      await postData(`${CINEMA_SERVICE_URL}/permissions`, {
+      await postData(`/permissions`, {
         id: userAdded.id,
         permissions: values.permissions,
       });
@@ -271,7 +269,7 @@ const AddUser = () => {
             sx={{
               width: "80px",
             }}
-            onClick={() => {}}
+            onClick={() => navigate(`/usersmanagement/allusers`)}
           >
             Cancel
           </Button>

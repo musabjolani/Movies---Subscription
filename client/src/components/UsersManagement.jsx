@@ -1,10 +1,12 @@
 import { Box } from "@mui/material";
 import ButtonsMenu from "./ButtonsMenu";
 import { Outlet } from "react-router-dom";
-import useForm from "../hooks/useForm";
 
 const UsersManagement = () => {
-  const Menuitems = ["All Users", "Add Users"];
+  const Menuitems = [
+    { title: "All Users", navigate: "allusers" },
+    { title: "Add Users", navigate: "adduser" },
+  ];
 
   return (
     <>
