@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import store from "../redux/store";
 import CINEMA_SERVICE_URL from "../Config/config";
 
+const excludedRoutes = ["/userDB/login"];
+
 const api = axios.create({
   baseURL: CINEMA_SERVICE_URL, // Set your API base URL
 });
@@ -15,6 +17,23 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const requestUrl = error.config.url; // Get the request URL
+
+    if (
+      error.response &&
+      error.response.statusText === "Unauthorized" &&
+      !excludedRoutes.includes(requestUrl) // Skip handling if the route is in the excluded list
+    ) {
+      window.location.href = "/login";
+      console.log("Unauthorized, redirecting to login...");
+    }
+    return Promise.reject(error);
+  }
+);
 
 const getAll = async (url) => {
   return await api.get(url);
@@ -31,4 +50,8 @@ const deleteById = async (url) => {
   await api.delete(url);
 };
 
-export { getAll, postData, updateById, deleteById };
+const getUserDetails = async () => {
+  return await api.get("/userDB/getUserDetails");
+};
+
+export { getAll, postData, updateById, deleteById, getUserDetails };

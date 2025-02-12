@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const usersJSONServ = require("../services/usersJSONServ");
+const { authMiddleware } = require("../middleware/authMiddleware");
+const { rolesMiddleware } = require("../middleware/rolesMiddleware");
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, rolesMiddleware(), async (req, res) => {
   try {
     res.json(await usersJSONServ.getAllUsers());
   } catch (error) {
-    res.json(res.status(404).json(error.message));
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
@@ -19,7 +21,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, rolesMiddleware(), async (req, res) => {
   try {
     const user = req.body;
     res.json(await usersJSONServ.addUser(user));

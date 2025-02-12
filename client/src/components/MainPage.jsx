@@ -2,28 +2,41 @@ import { useEffect, useState } from "react";
 import ButtonsMenu from "./ButtonsMenu";
 import { AppBar, Box, Toolbar, Typography } from "@mui/material";
 import { Outlet } from "react-router-dom";
-import { getAll } from "../Utils/dbUtils";
+import { getAll, getUserDetails } from "../Utils/dbUtils";
 
 const MainPage = () => {
-  const Menuitems = [
+  const [Menuitems, setMenuitems] = useState([
     { title: "Movies", navigate: "" },
     { title: "Subscriptions", navigate: "" },
     { title: "Users Management", navigate: `/usersmanagement/allusers` },
     { title: "LogOut", navigate: "logout" },
-  ];
-  const [userName, setUserName] = useState("");
+  ]);
+  const [user, setUser] = useState("");
 
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data } = await getAll(`/userDB/getUserInfo`);
-        setUserName(data?.user?.userName);
+        const { data } = await getUserDetails();
+
+        if (!data?.user) {
+          console.error("User data not found");
+          return;
+        }
+
+        setUser(data.user);
+
+        if (!data.user.isAdmin) {
+          setMenuitems((prevMenu) =>
+            prevMenu.filter((item) => item.title !== "Users Management")
+          );
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching user details:", error);
       }
     };
+
     getUser();
-  }, []);
+  }, [Menuitems]); // ✅ Added `Menuitems` to dependency array
 
   return (
     <>
@@ -36,7 +49,7 @@ const MainPage = () => {
                 mt: 2,
               }}
             >
-              <Typography variant="subtitle2">{`Hi ${userName}`}</Typography>
+              <Typography variant="subtitle2">{`Hi ${user?.userName}`}</Typography>
             </Box>
           </Toolbar>
         </AppBar>

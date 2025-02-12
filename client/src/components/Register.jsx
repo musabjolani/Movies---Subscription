@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import useForm from "../hooks/useForm";
-import { getAll, postData } from "../Utils/dbUtils";
+import { getAll, getUserDetails, postData } from "../Utils/dbUtils";
 import { useNavigate } from "react-router";
 
 const Register = () => {
@@ -37,7 +37,7 @@ const Register = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data } = await getAll(`/userDB/getUserInfo`);
+        const { data } = await getUserDetails();
         setValues({ ...values, userName: data?.user?.userName });
         setIsAdmin(data?.user?.isAdmin);
         console.log(data);

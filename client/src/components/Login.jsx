@@ -45,10 +45,13 @@ const Login = () => {
       if (errors && Object.keys(errors).length > 0) {
         return;
       }
-      const { data: token } = await postData(`/userDB/login`, values);
-      dispatch(setToken(token));
-      setErrorMessage("");
-      navigate("/");
+      const result = await postData(`/userDB/login`, values);
+      console.log(result);
+      if (result) {
+        dispatch(setToken(result.data));
+        setErrorMessage("");
+        navigate("/");
+      }
     } catch (error) {
       console.log(error);
       setErrorMessage(

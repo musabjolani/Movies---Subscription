@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const varifyToken = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers.Authorization || req.headers.authorization;
     if (!authHeader) return res.status(401).send({ message: "Unauthorized" });
@@ -17,4 +17,4 @@ const varifyToken = (req, res, next) => {
   }
 };
 
-module.exports = { varifyToken };
+module.exports = { authMiddleware };

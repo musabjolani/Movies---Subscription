@@ -3,25 +3,17 @@ const router = express.Router();
 const userDBServ = require("../services/userDBServ");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const authMiddleware = require("../middleware/authMiddleware");
-const rolesMiddleware = require("../middleware/rolesMiddleware");
-
 const SECRET_KEY = process.env.JWT_SECRET_KEY; // Define at the top
 
-router.get(
-  "/",
-  authMiddleware.varifyToken,
-  rolesMiddleware.OnlyAdminRole(true),
-  async (req, res) => {
-    try {
-      res.json(await userDBServ.getAllUsers());
-    } catch (error) {
-      res.json(res.status(404).json(error.message));
-    }
+router.get("/", async (req, res) => {
+  try {
+    res.json(await userDBServ.getAllUsers());
+  } catch (error) {
+    res.json(res.status(404).json(error.message));
   }
-);
+});
 
-router.get("/getUserInfo", authMiddleware.varifyToken, (req, res) => {
+router.get("/getUserDetails", (req, res) => {
   res.json({ user: req.user });
 });
 
@@ -60,6 +52,7 @@ router.post("/login", async (req, res) => {
     }
 
     // Retrieve user from DB (Ensure case-insensitive search)
+
     const user = await userDBServ.getUserAuth(userName);
 
     if (!user) return res.status(401).json({ message: "Invalid username" });
@@ -85,9 +78,9 @@ router.post("/login", async (req, res) => {
       }
     );
 
-    return res.json(token); // ✅ Return token properly
+    return res.json(token);
   } catch (error) {
-    console.error("Login error:", error); // ✅ Log the error for debugging
+    console.error("Login error:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 });

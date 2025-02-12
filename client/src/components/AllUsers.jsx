@@ -24,22 +24,26 @@ const AllUsers = () => {
   const [users, setUsers] = useState([]);
 
   const getAllUsers = async () => {
-    let indx = 0;
-    let userArr = [];
-    const { data: users } = await getAll(`/users`);
-    setUsers(users);
-    const { data: userPermissions } = await getAll(`/permissions`);
+    try {
+      let indx = 0;
+      let userArr = [];
+      const { data: users } = await getAll(`/users`);
+      setUsers(users);
+      const { data: userPermissions } = await getAll(`/permissions`);
 
-    userArr = [...users];
+      userArr = [...users];
 
-    userPermissions.map((userPerm) => {
-      indx = userArr.findIndex((user) => {
-        if (userPerm.id === user.id) return true;
+      userPermissions.map((userPerm) => {
+        indx = userArr.findIndex((user) => {
+          if (userPerm.id === user.id) return true;
+        });
+        if (indx != -1) userArr[indx].permissions = userPerm.permissions;
       });
-      if (indx != -1) userArr[indx].permissions = userPerm.permissions;
-    });
 
-    setUsers(userArr);
+      setUsers(userArr);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
