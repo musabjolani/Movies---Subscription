@@ -4,11 +4,23 @@ const autherizeRoles = (...allowedRoles) => {
   //    return res.status(403).send({message:"Access denied"});
 };
 
-const OnlyAdminRole = (userRole) => {
+const rolesMiddleware = () => {
   return (req, res, next) => {
-    if (!userRole) return res.status(403).send({ message: "Access denied" });
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No user data found" });
+    }
+
+    // ✅ Check if user has the required role
+    if (!req.user.isAdmin) {
+      return res
+        .status(403)
+        .json({ message: "Access Denied: Insufficient permissions" });
+    }
+
     return next();
   };
 };
 
-module.exports = { OnlyAdminRole };
+module.exports = { rolesMiddleware };

@@ -11,7 +11,10 @@ const getUserByUserId = (userId) => {
 };
 
 const getUserAuth = (userName) => {
-  return User.findOne({ userName: userName });
+  // not Cas-sensitive
+  return User.findOne({
+    userName: { $regex: new RegExp(`^${userName}$`, "i") },
+  });
 };
 
 const addUser = async (user) => {

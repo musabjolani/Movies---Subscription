@@ -7,21 +7,27 @@ import UsersManagement from "./components/UsersManagement";
 import AddUser from "./components/AddUser";
 import UpdateUser from "./components/UpdateUser";
 import AllUsers from "./components/AllUsers";
+import Logout from "./components/Logout";
+import { Provider } from "react-redux";
+import store from "./redux/store";
 
 function App() {
   return (
     <>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/" element={<MainPage />}>
-          <Route path="usersmanagement" element={<UsersManagement />}>
-            <Route path="adduser" element={<AddUser />}></Route>
-            <Route path="updateuser/:userId" element={<UpdateUser />}></Route>
-            <Route path="allusers" element={<AllUsers />}></Route>
+      <Provider store={store}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<MainPage />}>
+            <Route path="usersmanagement" element={<UsersManagement />}>
+              <Route path="adduser" element={<AddUser />}></Route>
+              <Route path="updateuser/:userId" element={<UpdateUser />}></Route>
+              <Route path="allusers" element={<AllUsers />}></Route>
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </Provider>
     </>
   );
 }

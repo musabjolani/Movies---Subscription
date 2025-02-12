@@ -5,7 +5,7 @@ import { deleteById, getAll } from "../Utils/dbUtils";
 import { useNavigate } from "react-router";
 import useForm from "../hooks/useForm";
 import { Link } from "react-router";
-import CINEMA_SERVICE_URL from "../Config/config";
+
 import {
   Alert,
   Box,
@@ -24,24 +24,26 @@ const AllUsers = () => {
   const [users, setUsers] = useState([]);
 
   const getAllUsers = async () => {
-    let indx = 0;
-    let userArr = [];
-    const { data: users } = await getAll(`${CINEMA_SERVICE_URL}/users`);
-    setUsers(users);
-    const { data: userPermissions } = await getAll(
-      `${CINEMA_SERVICE_URL}/permissions`
-    );
+    try {
+      let indx = 0;
+      let userArr = [];
+      const { data: users } = await getAll(`/users`);
+      setUsers(users);
+      const { data: userPermissions } = await getAll(`/permissions`);
 
-    userArr = [...users];
+      userArr = [...users];
 
-    userPermissions.map((userPerm) => {
-      indx = userArr.findIndex((user) => {
-        if (userPerm.id === user.id) return true;
+      userPermissions.map((userPerm) => {
+        indx = userArr.findIndex((user) => {
+          if (userPerm.id === user.id) return true;
+        });
+        if (indx != -1) userArr[indx].permissions = userPerm.permissions;
       });
-      if (indx != -1) userArr[indx].permissions = userPerm.permissions;
-    });
 
-    setUsers(userArr);
+      setUsers(userArr);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -52,9 +54,9 @@ const AllUsers = () => {
     try {
       e.preventDefault();
       if (confirm("Are tou sure you want to delete the User ?")) {
-        await deleteById(`${CINEMA_SERVICE_URL}/users/${id}`);
-        await deleteById(`${CINEMA_SERVICE_URL}/permissions/${id}`);
-        await deleteById(`${CINEMA_SERVICE_URL}/userDB/${id}`);
+        await deleteById(`/users/${id}`);
+        await deleteById(`/permissions/${id}`);
+        await deleteById(`/userDB/${id}`);
         getAllUsers();
       }
       // setSuccessMessage("The User Deleted Successfully ");
