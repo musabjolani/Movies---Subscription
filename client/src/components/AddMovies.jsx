@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import hasAllPermissions from "../Utils/permissionUtils";
 import { useNavigate } from "react-router";
 
-const AddUser = () => {
+const AddMovies = () => {
   let navigate = useNavigate();
   const initForm = {
     firstName: "",
@@ -279,4 +279,4 @@ const AddUser = () => {
   );
 };
 
-export default AddUser;
+export default AddMovies;

@@ -10,6 +10,8 @@ import AllUsers from "./components/AllUsers";
 import Logout from "./components/Logout";
 import { Provider } from "react-redux";
 import store from "./redux/store";
+import Movies from "./components/Movies";
+import AllMovies from "./components/AllMovies";
 
 function App() {
   return (
@@ -24,6 +26,14 @@ function App() {
               <Route path="adduser" element={<AddUser />}></Route>
               <Route path="updateuser/:userId" element={<UpdateUser />}></Route>
               <Route path="allusers" element={<AllUsers />}></Route>
+            </Route>
+            <Route path="movies" element={<Movies />}>
+              <Route path="addmovie" element={<AddUser />}></Route>
+              <Route
+                path="updatemovie/:userId"
+                element={<UpdateUser />}
+              ></Route>
+              <Route path="allmovies" element={<AllMovies />}></Route>
             </Route>
           </Route>
         </Routes>

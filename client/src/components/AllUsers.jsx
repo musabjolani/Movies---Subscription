@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import logo from "../assets/movies-sub.png";
 import TextField from "@mui/material/TextField";
-import { deleteById, getAll } from "../Utils/dbUtils";
+import { deleteById, getAll } from "../Utils/dbUtilsForCinemaService";
 import { useNavigate } from "react-router";
 import useForm from "../hooks/useForm";
 import { Link } from "react-router";

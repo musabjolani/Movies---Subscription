@@ -9,7 +9,11 @@ import {
   Typography,
 } from "@mui/material";
 import useForm from "../hooks/useForm";
-import { getAll, getUserDetails, postData } from "../Utils/dbUtils";
+import {
+  getAll,
+  getUserDetails,
+  postData,
+} from "../Utils/dbUtilsForCinemaService";
 import { useNavigate } from "react-router";
 
 const Register = () => {
@@ -40,7 +44,6 @@ const Register = () => {
         const { data } = await getUserDetails();
         setValues({ ...values, userName: data?.user?.userName });
         setIsAdmin(data?.user?.isAdmin);
-        console.log(data);
       } catch (error) {}
     };
     getUser();

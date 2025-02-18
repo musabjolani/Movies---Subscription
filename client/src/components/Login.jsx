@@ -1,7 +1,7 @@
 import { useState } from "react";
 import logo from "../assets/movies-sub.png";
 import TextField from "@mui/material/TextField";
-import { postData } from "../Utils/dbUtils";
+import { postData } from "../Utils/dbUtilsForCinemaService";
 import { useNavigate } from "react-router";
 import useForm from "../hooks/useForm";
 import { Link } from "react-router";
@@ -46,14 +46,12 @@ const Login = () => {
         return;
       }
       const result = await postData(`/userDB/login`, values);
-      console.log(result);
       if (result) {
         dispatch(setToken(result.data));
         setErrorMessage("");
         navigate("/");
       }
     } catch (error) {
-      console.log(error);
       setErrorMessage(
         error.response ? error.response.data.message : error.message
       );

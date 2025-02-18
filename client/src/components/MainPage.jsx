@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import ButtonsMenu from "./ButtonsMenu";
 import { AppBar, Box, Toolbar, Typography } from "@mui/material";
 import { Outlet } from "react-router-dom";
-import { getAll, getUserDetails } from "../Utils/dbUtils";
+import { getAll, getUserDetails } from "../Utils/dbUtilsForCinemaService";
 
 const MainPage = () => {
   const [Menuitems, setMenuitems] = useState([
-    { title: "Movies", navigate: "" },
+    { title: "Movies", navigate: "/movies" },
     { title: "Subscriptions", navigate: "" },
     { title: "Users Management", navigate: `/usersmanagement/allusers` },
     { title: "LogOut", navigate: "logout" },
@@ -36,7 +36,7 @@ const MainPage = () => {
     };
 
     getUser();
-  }, [Menuitems]); // ✅ Added `Menuitems` to dependency array
+  }, []);
 
   return (
     <>

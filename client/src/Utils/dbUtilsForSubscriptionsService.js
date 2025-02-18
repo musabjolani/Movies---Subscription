@@ -1,12 +1,12 @@
 import axios from "axios";
 import { useSelector } from "react-redux";
 import store from "../redux/store";
-import CINEMA_SERVICE_URL from "../Config/config";
+import { SUBSCRIPTIONS_SERVICE_URL } from "../Config/config";
 
 const excludedRoutes = ["/userDB/login"];
 
 const api = axios.create({
-  baseURL: CINEMA_SERVICE_URL, // Set your API base URL
+  baseURL: SUBSCRIPTIONS_SERVICE_URL, // Set your API base URL
 });
 
 // Add a request interceptor to inject the token
