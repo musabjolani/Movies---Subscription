@@ -9,7 +9,7 @@ import {
   Button,
   Alert,
 } from "@mui/material";
-import { postData } from "../Utils/dbUtils";
+import { postData } from "../Utils/dbUtilsForCinemaService";
 import { useEffect, useState } from "react";
 import hasAllPermissions from "../Utils/permissionUtils";
 import { useNavigate } from "react-router";

@@ -14,9 +14,27 @@ const schemas = {
     createdDate: Joi.string()
       .pattern(/^([1-9]|0[1-9]|[12][0-9]|3[01])\/([1-9]|0[1-9]|1[0-2])\/\d{4}$/) // Ensuring DD_MM-YYYY format
       .required()
-      .label("Created Date"),
+      .label("Created Date")
+      .messages({
+        "string.pattern.base": "Created Date must be in DD/MM/YYYY format",
+      }),
     permissions: Joi.any(),
     id: Joi.any(),
+  }),
+
+  addMovieSchema: Joi.object({
+    name: Joi.string().required().label("Name"),
+    genresString: Joi.any(),
+    image: Joi.any(),
+    premiered: Joi.string()
+      .allow("")
+      .pattern(/^([1-9]|0[1-9]|[12][0-9]|3[01])\/([1-9]|0[1-9]|1[0-2])\/\d{4}$/) // Ensuring DD_MM-YYYY format
+      .label("Premiered Date")
+      .messages({
+        "string.pattern.base": "Premiered Date must be in DD/MM/YYYY format",
+      }),
+    genres: Joi.any(),
+    _id: Joi.any(),
   }),
 };
 
