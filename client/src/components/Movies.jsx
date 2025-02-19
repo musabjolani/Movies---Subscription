@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 const Movies = () => {
   const Menuitems = [
     { title: "All Movies", navigate: "allmovies" },
-    { title: "Add Users", navigate: "addmovie" },
+    { title: "Add Movie", navigate: "addmovie" },
   ];
 
   return (

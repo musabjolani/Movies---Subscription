@@ -1,27 +1,16 @@
 import useForm from "../hooks/useForm";
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  TextField,
-  Typography,
-  Button,
-  Alert,
-} from "@mui/material";
-import { postData } from "../Utils/dbUtilsForCinemaService";
+import { Box, TextField, Typography, Button, Alert } from "@mui/material";
+import { postData } from "../Utils/dbUtilsForSubscriptionsService";
 import { useEffect, useState } from "react";
-import hasAllPermissions from "../Utils/permissionUtils";
 import { useNavigate } from "react-router";
 
 const AddMovies = () => {
   let navigate = useNavigate();
   const initForm = {
-    firstName: "",
-    lastName: "",
-    userName: "",
-    createdDate: "",
-    permissions: [],
+    name: "",
+    genres: "",
+    image: "",
+    premiered: "",
   };
 
   const {
@@ -33,58 +22,22 @@ const AddMovies = () => {
     isFormSubmitted,
     setIsFormSubmitted,
     resetForm,
-  } = useForm(initForm, "addUserSchema");
+  } = useForm(initForm, "addMovieSchema");
 
-  const labelWidth = "200px";
+  const labelWidth = "90px";
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const permissions = [
-    "View Subscriptions",
-    "Create Subscriptions",
-    "Delete Subscriptions",
-    "Update Subscriptions",
-    "View Movies",
-    "Create Movies",
-    "Delete Movies",
-    "Update Movies",
-  ];
-
-  const selectedSubscriptions = hasAllPermissions(values.permissions, [
-    "Create Subscriptions",
-    "Delete Subscriptions",
-    "Update Subscriptions",
-  ]);
-
   useEffect(() => {
-    if (
-      selectedSubscriptions &&
-      !values.permissions.includes("View Subscriptions")
-    ) {
+    if (values.genresString)
       setValues({
         ...values,
-        permissions: [...values.permissions, "View Subscriptions"],
+        genres: values.genresString.split(",").map((genre) => genre.trim()),
       });
-    }
-  }, [selectedSubscriptions]);
+  }, [values.genresString]);
 
-  const selectedMovies = hasAllPermissions(values.permissions, [
-    "Create Movies",
-    "Delete Movies",
-    "Update Movies",
-  ]);
-
-  useEffect(() => {
-    if (selectedMovies && !values.permissions.includes("View Movies")) {
-      setValues({
-        ...values,
-        permissions: [...values.permissions, "View Movies"],
-      });
-    }
-  }, [selectedMovies]);
-
-  const submitUser = async (e) => {
+  const submitMovie = async (e) => {
     try {
       e.preventDefault();
       setIsFormSubmitted(true);
@@ -94,24 +47,13 @@ const AddMovies = () => {
         setErrorMessage("Check your error Please");
         return;
       }
-
-      const { data: userAdded } = await postData(`/users`, {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        createdDate: values.createdDate,
-        sessionTimeOut: values.sessionTimeOut,
-      });
-      await postData(`/userDB`, {
-        userId: userAdded.id,
-        userName: values.userName,
-      });
-      await postData(`/permissions`, {
-        id: userAdded.id,
-        permissions: values.permissions,
-      });
-
+      const { genresString, ...valuesWithoutGenresString } = values;
+      const { data: movieAdded } = await postData(
+        `/movies`,
+        valuesWithoutGenresString
+      );
       resetForm();
-      setSuccessMessage("The User Added Successfully ");
+      setSuccessMessage("The Movie Added Successfully ");
     } catch (error) {
       setErrorMessage(
         error.response ? error.response.data.message : error.message
@@ -119,132 +61,96 @@ const AddMovies = () => {
     }
   };
 
-  const handlePermissions = (e) => {
-    const { checked, value } = e.target;
-    const updatedPermissions = checked
-      ? [...values.permissions, value]
-      : values.permissions.filter((permission) => permission !== value);
-
-    setValues({ ...values, permissions: updatedPermissions });
-  };
-
   return (
     <>
-      <form onSubmit={(e) => submitUser(e)}>
+      <form onSubmit={(e) => submitMovie(e)}>
         <Box sx={{ dispaly: "on", my: 2 }}>
           <Typography variant="h5" component="h2">
-            Add New User
+            Add New Movie
           </Typography>
         </Box>
         <Box sx={{ mb: 0.5 }}>
           <label className="label" style={{ width: labelWidth }}>
-            First Name
+            Name
           </label>
           <TextField
-            name="firstName"
-            value={values.firstName}
+            sx={{ width: "300px" }}
+            name="name"
+            value={values.name}
             variant="outlined"
             size="small"
             onChange={(e) => handleInputChange(e)}
             {...(isFormSubmitted &&
-              errors.firstName && {
+              errors.name && {
                 error: true,
-                helperText: errors.firstName,
+                helperText: errors.name,
               })}
           />
         </Box>
         <br />
         <Box sx={{ mb: 0.5 }}>
           <label className="label" style={{ width: labelWidth }}>
-            Last Name
+            Genres
           </label>
           <TextField
-            name="lastName"
-            value={values.lastName}
+            sx={{ width: "300px" }}
+            name="genresString"
+            value={values.genresString}
             variant="outlined"
             size="small"
+            placeholder="Genres separated by commas "
             onChange={(e) => handleInputChange(e)}
             {...(isFormSubmitted &&
-              errors.lastName && {
+              errors.genresString && {
                 error: true,
-                helperText: errors.lastName,
+                helperText: errors.genresString,
               })}
           />
         </Box>
         <br />
         <Box sx={{ mb: 0.5 }}>
           <label className="label" style={{ width: labelWidth }}>
-            User Name
+            Image URL
           </label>
           <TextField
-            name="userName"
-            value={values.userName}
+            sx={{ width: "300px" }}
+            name="image"
+            value={values.image}
             variant="outlined"
             size="small"
             onChange={(e) => handleInputChange(e)}
             {...(isFormSubmitted &&
-              errors.userName && {
+              errors.image && {
                 error: true,
-                helperText: errors.userName,
-              })}
-          />
-        </Box>
-        <br />
-        <Box sx={{ mb: 0.5 }}>
-          <label className="label" style={{ width: labelWidth }}>
-            Session Time Out (Minutes){" "}
-          </label>
-          <TextField
-            name="sessionTimeOut"
-            value={values.sessionTimeOut || 0}
-            variant="outlined"
-            size="small"
-            type="number"
-            onChange={(e) => handleInputChange(e)}
-            {...(isFormSubmitted &&
-              errors.sessionTimeOut && {
-                error: true,
-                helperText: errors.sessionTimeOut,
+                helperText: errors.image,
               })}
           />
         </Box>
         <br />
 
+        <br />
+
         <Box sx={{ mb: 0.5 }}>
           <label className="label" style={{ width: labelWidth }}>
-            Created Date
+            Premiered
           </label>
 
           <TextField
-            name="createdDate"
-            value={values.createdDate}
+            sx={{ width: "150px" }}
+            name="premiered"
+            value={values.premiered}
             variant="outlined"
             size="small"
             placeholder="DD/MM/YYYY"
             onChange={(e) => handleInputChange(e)}
             {...(isFormSubmitted &&
-              errors.createdDate && {
+              errors.premiered && {
                 error: true,
-                helperText: errors.createdDate,
+                helperText: errors.premiered,
               })}
           />
         </Box>
         <br />
-
-        <Typography variant="h5">Permissons:</Typography>
-        <br />
-        <FormGroup>
-          {permissions.map((permission) => (
-            <FormControlLabel
-              key={permission}
-              control={<Checkbox />}
-              label={permission}
-              checked={values.permissions.includes(permission)}
-              value={permission}
-              onChange={(e) => handlePermissions(e)}
-            />
-          ))}
-        </FormGroup>
         {errorMessage && errorMessage != "" && (
           <Alert severity="error">{errorMessage}</Alert>
         )}
@@ -269,7 +175,7 @@ const AddMovies = () => {
             sx={{
               width: "80px",
             }}
-            onClick={() => navigate(`/usersmanagement/allusers`)}
+            onClick={() => navigate(`/movies/allmovies`)}
           >
             Cancel
           </Button>

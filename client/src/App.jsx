@@ -12,6 +12,7 @@ import { Provider } from "react-redux";
 import store from "./redux/store";
 import Movies from "./components/Movies";
 import AllMovies from "./components/AllMovies";
+import AddMovies from "./components/AddMovies";
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
               <Route path="allusers" element={<AllUsers />}></Route>
             </Route>
             <Route path="movies" element={<Movies />}>
-              <Route path="addmovie" element={<AddUser />}></Route>
+              <Route path="addmovie" element={<AddMovies />}></Route>
               <Route
                 path="updatemovie/:userId"
                 element={<UpdateUser />}
