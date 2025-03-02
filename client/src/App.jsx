@@ -14,6 +14,9 @@ import Movies from "./components/Movies";
 import AllMovies from "./components/AllMovies";
 import AddMovies from "./components/AddMovies";
 import UpdateMovie from "./components/UpdateMovie";
+import Subscriptions from "./components/Subscriptions";
+import AllMembers from "./components/AllMembers";
+import UpdateMember from "./components/UpdateMember";
 
 function App() {
   return (
@@ -36,6 +39,18 @@ function App() {
                 element={<UpdateMovie />}
               ></Route>
               <Route path="allmovies" element={<AllMovies />}></Route>
+            </Route>
+            <Route path="subscriptions" element={<Subscriptions />}>
+              <Route path="addmovie" element={<AddMovies />}></Route>
+              <Route
+                path="updatemovie/:movieId"
+                element={<UpdateMovie />}
+              ></Route>
+              <Route path="allmembers" element={<AllMembers />}></Route>
+              <Route
+                path="updatemember/:memberId"
+                element={<UpdateMember />}
+              ></Route>
             </Route>
           </Route>
         </Routes>

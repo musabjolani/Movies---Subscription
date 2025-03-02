@@ -7,7 +7,7 @@ import { getAll, getUserDetails } from "../Utils/dbUtilsForCinemaService";
 const MainPage = () => {
   const [Menuitems, setMenuitems] = useState([
     { title: "Movies", navigate: "/movies" },
-    { title: "Subscriptions", navigate: "" },
+    { title: "Subscriptions", navigate: "/subscriptions" },
     { title: "Users Management", navigate: `/usersmanagement/allusers` },
     { title: "LogOut", navigate: "logout" },
   ]);

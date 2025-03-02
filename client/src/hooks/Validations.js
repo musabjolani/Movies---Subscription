@@ -22,6 +22,28 @@ const schemas = {
     id: Joi.any(),
   }),
 
+  addMovieToSubscriptionsSchema: Joi.object({
+    date: Joi.string()
+      .required()
+      .pattern(/^([1-9]|0[1-9]|[12][0-9]|3[01])\/([1-9]|0[1-9]|1[0-2])\/\d{4}$/) // Ensuring DD_MM-YYYY format
+      .label("Premiered Date")
+      .messages({
+        "string.pattern.base": "Premiered Date must be in DD/MM/YYYY format",
+      }),
+    movieId: Joi.string().required(),
+  }),
+  memeberSchema: Joi.object({
+    name: Joi.string().required().label("Name"),
+    city: Joi.string().required().label("City"),
+    email: Joi.string()
+      .email({ tlds: { allow: false } }) // Ensure valid email format
+      .required()
+      .messages({
+        "string.empty": "Email is required",
+        "string.email": "Enter a valid email address",
+      }),
+    _id: Joi.any(),
+  }),
   addMovieSchema: Joi.object({
     name: Joi.string().required().label("Name"),
     genresString: Joi.any(),

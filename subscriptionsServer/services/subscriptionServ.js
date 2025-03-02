@@ -8,16 +8,31 @@ const getSubscriptionByID = (id) => {
   return subscriptionRep.getSubscriptionByID(id);
 };
 
-const getMoviesByMember = async (memberId) => {
-  const memberSubscriptions = await subscriptionRep.getMoviesByMember(memberId);
+const getAllMembersWithMovies = () => {
+  return subscriptionRep.getAllMembersWithMovies();
+};
 
-  return memberSubscriptions.map((subscription) => {
-    return {
-      movies: subscription.movies.map((movie) => {
-        return { name: movie.movieId.name, date: movie.date };
-      }),
-    };
-  });
+const getMoviesByMember = async (memberId) => {
+  const memberSubscriptions = (
+    await subscriptionRep.getMoviesByMember(memberId)
+  )[0];
+
+  if (!memberSubscriptions) return [];
+
+  if (memberSubscriptions && memberSubscriptions.toObject) {
+    memberSubscriptions = memberSubscriptions.toObject();
+  }
+
+  return {
+    ...memberSubscriptions,
+    movies: memberSubscriptions.movies.map((movie) => {
+      return {
+        id: movie.movieId._id,
+        name: movie.movieId.name,
+        date: movie.date,
+      };
+    }),
+  };
 };
 const getMembersByMovies = async (movieId) => {
   const subscriptions = await subscriptionRep.getMembersByMovies(movieId);
@@ -47,31 +62,39 @@ memberWithMovie:{
   }
 }*/
 const addMovieToSubscription = async (memberWithMovie) => {
-  const subscription = await getSubscriptionByID(
-    memberWithMovie.subscriptionId
-  );
+  try {
+    //  Fetch existing subscription (should return an object, not an array)
+    let subscription = await subscriptionRep.getSubscriptionByMember(
+      memberWithMovie.memberId
+    );
 
-  // If the subscription doesn't exist or is empty, create a new one
-  if (!subscription || Object.keys(subscription).length === 0) {
-    const newSubscription = {
-      memberId: memberWithMovie.memberId,
-      movies: [
-        {
+    //  If no subscription exists, create a new one
+    if (!subscription) {
+      const newSubscription = {
+        memberId: memberWithMovie.memberId,
+        movies: [
+          {
+            movieId: memberWithMovie.movie.movieId,
+            date: memberWithMovie.movie.date,
+          },
+        ],
+      };
+      return await addSubscription(newSubscription); //  Use `await`
+    }
+
+    //  Use Mongoose `$push` to add the movie efficiently
+    return await updateSubscription(subscription._id, {
+      $push: {
+        movies: {
           movieId: memberWithMovie.movie.movieId,
           date: memberWithMovie.movie.date,
         },
-      ],
-    };
-    return addSubscription(newSubscription);
+      },
+    });
+  } catch (error) {
+    console.error("Error in addMovieToSubscription:", error);
+    throw new Error("Failed to add movie to subscription " + error);
   }
-
-  // Add the movie to the existing subscription
-  subscription.movies.push({
-    movieId: memberWithMovie.movie.movieId,
-    date: memberWithMovie.movie.date,
-  });
-
-  return updateSubscription(memberWithMovie.subscriptionId, subscription);
 };
 
 const updateSubscription = (id, subscription) => {
@@ -87,6 +110,7 @@ module.exports = {
   getSubscriptionByID,
   getMoviesByMember,
   getMembersByMovies,
+  getAllMembersWithMovies,
   addSubscription,
   addMovieToSubscription,
   updateSubscription,
