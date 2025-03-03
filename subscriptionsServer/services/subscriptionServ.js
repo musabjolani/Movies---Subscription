@@ -11,6 +11,9 @@ const getSubscriptionByID = (id) => {
 const getAllMembersWithMovies = () => {
   return subscriptionRep.getAllMembersWithMovies();
 };
+const getAllMoviesWithMembers = () => {
+  return subscriptionRep.getAllMoviesWithMembers();
+};
 
 const getMoviesByMember = async (memberId) => {
   const memberSubscriptions = (
@@ -111,6 +114,7 @@ module.exports = {
   getMoviesByMember,
   getMembersByMovies,
   getAllMembersWithMovies,
+  getAllMoviesWithMembers,
   addSubscription,
   addMovieToSubscription,
   updateSubscription,

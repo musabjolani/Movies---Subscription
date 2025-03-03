@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { deleteById, getAll } from "../Utils/dbUtilsForSubscriptionsService";
 import { useNavigate } from "react-router";
 import { useOutletContext } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -23,7 +23,9 @@ const AllMovies = () => {
   const [search] = useOutletContext();
   const getAllMovies = async () => {
     try {
-      const { data: movies } = await getAll(`/movies`);
+      const { data: movies } = await getAll(
+        `/subscriptions/getAllMoviesWithMembers`
+      );
       setMovies(movies);
     } catch (error) {
       console.log(error);
@@ -89,9 +91,9 @@ const AllMovies = () => {
                   </Typography>
                   <Box
                     sx={{
-                      overflow: "scroll",
+                      display: "flex",
                       border: "2px solid black",
-                      height: "100px",
+                      minHeight: "100px",
                     }}
                   >
                     <Typography
@@ -105,13 +107,17 @@ const AllMovies = () => {
                       Subscriptions Watched
                     </Typography>
                     <ul>
-                      <li>Coffee</li>
-                      <li>Tea</li>
-                      <li>Milk</li>
-                      <li>Tea</li>
-                      <li>Milk</li>
-                      <li>Tea</li>
-                      <li>Milk</li>
+                      {movie.subscribedMembers.map((member) => (
+                        <li>
+                          {" "}
+                          <Link to={`/movies/allmovies`}>
+                            {" "}
+                            {`${member.name} ,${new Date(
+                              member.subscriptionDate
+                            ).toLocaleDateString("en-GB")}`}
+                          </Link>
+                        </li>
+                      ))}
                     </ul>
                   </Box>
                 </Box>

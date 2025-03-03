@@ -1,4 +1,5 @@
 const Member = require("../models/memberModel");
+const Movie = require("../models/movieModel");
 const Subscription = require("../models/subscriptionModel");
 const utils = require("../Utils/utils");
 
@@ -101,9 +102,87 @@ const getAllMembersWithMovies = async () => {
   }
 };
 
+const getAllMoviesWithMembers = async () => {
+  try {
+    const movies = await Movie.aggregate([
+      {
+        $lookup: {
+          from: "subscriptions", // Joins with subscriptions collection
+          localField: "_id",
+          foreignField: "movies.movieId",
+          as: "subscriptions",
+        },
+      },
+      {
+        $unwind: {
+          path: "$subscriptions",
+          preserveNullAndEmptyArrays: true, // Keep movies even if they have no subscriptions
+        },
+      },
+      {
+        $unwind: {
+          path: "$subscriptions.movies", // Unwind movies array inside subscriptions
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          $expr: { $eq: ["$subscriptions.movies.movieId", "$_id"] },
+        },
+      },
+      {
+        $lookup: {
+          from: "members", // Joins with members collection
+          localField: "subscriptions.memberId",
+          foreignField: "_id",
+          as: "subscribedMembers",
+        },
+      },
+      {
+        $unwind: {
+          path: "$subscribedMembers",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          genres: 1,
+          image: 1,
+          premiered: 1,
+          subscribedMembers: {
+            _id: "$subscribedMembers._id",
+            name: "$subscribedMembers.name",
+            email: "$subscribedMembers.email",
+            city: "$subscribedMembers.city",
+            subscriptionDate: "$subscriptions.movies.date", // Extract subscription date
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          genres: { $first: "$genres" },
+          image: { $first: "$image" },
+          premiered: { $first: "$premiered" },
+          subscribedMembers: { $push: "$subscribedMembers" },
+        },
+      },
+    ]);
+
+    return movies;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
 const getSubscriptionByMember = async (memberId) => {
   return await Subscription.findOne({ memberId: memberId });
 };
+
 const getMoviesByMember = async (memberId) => {
   return await Subscription.find({ memberId: memberId })
     .populate("movies.movieId")
@@ -135,7 +214,7 @@ module.exports = {
   getSubscriptionByID,
   getMoviesByMember,
   getSubscriptionByMember,
-  getMembersByMovies,
+  getAllMoviesWithMembers,
   getAllMembersWithMovies,
   addSubscription,
   updateSubscription,
