@@ -1,5 +1,4 @@
 import axios from "axios";
-import { useSelector } from "react-redux";
 import store from "../redux/store";
 import { CINEMA_SERVICE_URL } from "../Config/config";
 
@@ -50,8 +49,8 @@ const deleteById = async (url) => {
   await api.delete(url);
 };
 
-const getUserDetails = async () => {
-  return await api.get("/userDB/getUserDetails");
+const getLoggedUserDetails = async () => {
+  return await api.get("/userDB/getLoggedUserDetails");
 };
 
-export { getAll, postData, updateById, deleteById, getUserDetails };
+export { getAll, postData, updateById, deleteById, getLoggedUserDetails };

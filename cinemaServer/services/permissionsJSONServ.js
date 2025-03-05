@@ -7,7 +7,7 @@ const getAllPermissions = async () => {
 };
 const getPermissionByID = async (id) => {
   const Permissions = await fileJSONRep.getAllFileData(filePath);
-  return Permissions.filter((Permission) => Permission.id === id);
+  return Permissions.find((Permission) => Permission.id === id);
 };
 
 const addPermission = async (userWithPermissions) => {

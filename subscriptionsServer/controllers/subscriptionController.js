@@ -10,6 +10,21 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/getAllMembersWithMovies", async (req, res) => {
+  try {
+    res.json(await subscriptionServ.getAllMembersWithMovies());
+  } catch (error) {
+    res.json(res.status(404).json(error.message));
+  }
+});
+router.get("/getAllMoviesWithMembers", async (req, res) => {
+  try {
+    res.json(await subscriptionServ.getAllMoviesWithMembers());
+  } catch (error) {
+    res.json(res.status(404).json(error.message));
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -18,6 +33,7 @@ router.get("/:id", async (req, res) => {
     res.json(res.status(404).json(error.message));
   }
 });
+
 router.get("/members/:movieId", async (req, res) => {
   try {
     const { movieId } = req.params;

@@ -11,7 +11,7 @@ import {
 import useForm from "../hooks/useForm";
 import {
   getAll,
-  getUserDetails,
+  getLoggedUserDetails,
   postData,
 } from "../Utils/dbUtilsForCinemaService";
 import { useNavigate } from "react-router";
@@ -41,7 +41,7 @@ const Register = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data } = await getUserDetails();
+        const { data } = await getLoggedUserDetails();
         setValues({ ...values, userName: data?.user?.userName });
         setIsAdmin(data?.user?.isAdmin);
       } catch (error) {}

@@ -1,12 +1,16 @@
 import { useState } from "react";
 import logo from "../assets/movies-sub.png";
 import TextField from "@mui/material/TextField";
-import { postData } from "../Utils/dbUtilsForCinemaService";
+import {
+  getAll,
+  getLoggedUserDetails,
+  postData,
+} from "../Utils/dbUtilsForCinemaService";
 import { useNavigate } from "react-router";
 import useForm from "../hooks/useForm";
 import { Link } from "react-router";
 import { useDispatch } from "react-redux";
-import { setToken } from "../redux/authSlice";
+import { setPermissions, setToken } from "../redux/authSlice";
 import {
   Alert,
   Box,
@@ -36,6 +40,7 @@ const Login = () => {
   );
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [test, setTest] = useState({});
 
   const LoginUser = async (e) => {
     try {
@@ -45,9 +50,27 @@ const Login = () => {
       if (errors && Object.keys(errors).length > 0) {
         return;
       }
-      const result = await postData(`/userDB/login`, values);
-      if (result) {
-        dispatch(setToken(result.data));
+      const logginUser = await postData(`/userDB/login`, values);
+
+      setTest(logginUser);
+      if (logginUser) {
+        dispatch(setToken(logginUser.data));
+
+        const { data: loggedUser } = await getLoggedUserDetails();
+
+        if (!loggedUser?.user) {
+          console.error("User data not found");
+        }
+
+        // const { data: permissions } = await getAll(
+        //   `permissions/${loggedUser.user.userId}`
+        // );
+
+        // if (!permissions) {
+        //   console.error("Invalid user data received:", user);
+        // }
+
+        // dispatch(setPermissions(permissions.permissions));
         setErrorMessage("");
         navigate("/");
       }

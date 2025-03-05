@@ -12,6 +12,7 @@ const ButtonsMenu = ({ items }) => {
     <Stack direction="row" spacing={2}>
       {items.map((item, indx) => (
         <MenuItemButton
+          sx={{ height: "35px" }}
           key={indx}
           className={indx === selected ? "Selected" : "none"}
           onClick={() => {

@@ -4,7 +4,7 @@ const autherizeRoles = (...allowedRoles) => {
   //    return res.status(403).send({message:"Access denied"});
 };
 
-const rolesMiddleware = () => {
+const rolesMiddleware = (requiredPermission) => {
   return (req, res, next) => {
     if (!req.user) {
       return res
@@ -16,9 +16,17 @@ const rolesMiddleware = () => {
     if (!req.user.isAdmin) {
       return res
         .status(403)
-        .json({ message: "Access Denied: Insufficient permissions" });
+        .json({ message: "Access Denied: No Admin permissions" });
     }
 
+    if (
+      !req.user.permissions ||
+      !req.user.permissions.includes(requiredPermission)
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Access Denied: Insufficient permissions" });
+    }
     return next();
   };
 };
