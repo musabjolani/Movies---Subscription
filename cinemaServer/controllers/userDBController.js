@@ -1,9 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userDBServ = require("../services/userDBServ");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const SECRET_KEY = process.env.JWT_SECRET_KEY; // Define at the top
 
 router.get("/", async (req, res) => {
   try {
@@ -13,7 +11,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/getUserDetails", (req, res) => {
+router.get("/getLoggedUserDetails", (req, res) => {
   res.json({ user: req.user });
 });
 
@@ -42,46 +40,10 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { userName, password } = req.body;
-
-    // Handle SYSAdmin login (Hardcoded Admin Credentials - Ideally store securely)
-    if (userName.toLowerCase() === "sysadmin" && password === "1234") {
-      const token = jwt.sign({ userName, isAdmin: true }, SECRET_KEY, {
-        expiresIn: "1h",
-      });
-      return res.json(token); //  Return token properly
-    }
-
-    // Retrieve user from DB (Ensure case-insensitive search)
-
-    const user = await userDBServ.getUserAuth(userName);
-
-    if (!user) return res.status(401).json({ message: "Invalid username" });
-
-    // Check if the user has a password set (Prompt for reset if missing)
-    if (!user.password) {
-      return res.status(401).json({ message: "Reset password Please" });
-    }
-
-    // Verify password
-    const passwordMatch = await bcrypt.compare(password, user.password);
-
-    if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { userName: user.userName, isAdmin: false },
-      SECRET_KEY,
-      {
-        expiresIn: "1h",
-      }
-    );
-
-    return res.json(token);
+    return res.json(await userDBServ.login(userName, password));
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: error.message });
   }
 });
 

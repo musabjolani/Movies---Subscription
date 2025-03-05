@@ -7,7 +7,7 @@ const getAllUsers = async () => {
 };
 const getUserByID = async (id) => {
   const users = await fileJSONRep.getAllFileData(filePath);
-  return users.filter((user) => user.id === id);
+  return users.find((user) => user.id === id);
 };
 
 const addUser = async (user) => {

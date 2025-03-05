@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   token: localStorage.getItem("token") || null,
+  permissions: [] || null,
 };
 
 const authSlice = createSlice({
@@ -16,8 +17,11 @@ const authSlice = createSlice({
       state.token = null;
       localStorage.removeItem("token");
     },
+    setPermissions: (state, action) => {
+      state.permissions = action.payload;
+    },
   },
 });
 
-export const { setToken, removeToken } = authSlice.actions;
+export const { setToken, removeToken, setPermissions } = authSlice.actions;
 export default authSlice.reducer;

@@ -2,34 +2,30 @@ import { useEffect, useState } from "react";
 import ButtonsMenu from "./ButtonsMenu";
 import { AppBar, Box, Toolbar, Typography } from "@mui/material";
 import { Outlet } from "react-router-dom";
-import { getAll, getUserDetails } from "../Utils/dbUtilsForCinemaService";
+import { getAll, getLoggedUserDetails } from "../Utils/dbUtilsForCinemaService";
+import Header from "./Header";
 
 const MainPage = () => {
-  const [Menuitems, setMenuitems] = useState([
+  const initialMenuItems = [
     { title: "Movies", navigate: "/movies" },
     { title: "Subscriptions", navigate: "/subscriptions" },
-    { title: "Users Management", navigate: `/usersmanagement/allusers` },
-    { title: "LogOut", navigate: "logout" },
-  ]);
-  const [user, setUser] = useState("");
+    { title: "Users Management", navigate: "/usersmanagement/allusers" },
+    { title: "LogOut", navigate: "/logout" },
+  ];
+
+  const [menuItems, setMenuItems] = useState(initialMenuItems);
+  const [user, setUser] = useState({ user: null });
 
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data } = await getUserDetails();
+        const { data: loggedUser } = await getLoggedUserDetails();
 
-        if (!data?.user) {
+        if (!loggedUser) {
           console.error("User data not found");
           return;
         }
-
-        setUser(data.user);
-
-        if (!data.user.isAdmin) {
-          setMenuitems((prevMenu) =>
-            prevMenu.filter((item) => item.title !== "Users Management")
-          );
-        }
+        setUser(loggedUser);
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
@@ -38,25 +34,22 @@ const MainPage = () => {
     getUser();
   }, []);
 
+  useEffect(() => {
+    setMenuItems(initialMenuItems);
+    if (!user?.user?.isAdmin) {
+      setMenuItems((prevMenu) =>
+        prevMenu.filter((item) => item.title !== "Users Management")
+      );
+    }
+  }, [user]);
+
   return (
     <>
       <Box>
-        <AppBar position="static">
-          <Toolbar sx={{ display: "block" }}>
-            <Box
-              sx={{
-                float: "right",
-                mt: 2,
-              }}
-            >
-              <Typography variant="subtitle2">{`Hi ${user?.userName}`}</Typography>
-            </Box>
-          </Toolbar>
-        </AppBar>
+        <Header user={user}></Header>
       </Box>
-      <Typography variant="h4">Movie - Subscriptions Web Site</Typography>
       <Box sx={{ mt: 3 }}>
-        <ButtonsMenu items={Menuitems}> </ButtonsMenu>
+        <ButtonsMenu items={menuItems}> </ButtonsMenu>
       </Box>
       <Box sx={{ border: "2px solid black", mt: 3 }}>
         <Outlet />

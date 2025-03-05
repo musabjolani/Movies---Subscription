@@ -10,7 +10,7 @@ const getUserByUserId = (userId) => {
   return User.findOne({ userId: userId });
 };
 
-const getUserAuth = (userName) => {
+const getUserAuth = async (userName) => {
   // not Cas-sensitive
   return User.findOne({
     userName: { $regex: new RegExp(`^${userName}$`, "i") },
