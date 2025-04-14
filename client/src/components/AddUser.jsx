@@ -57,6 +57,12 @@ const AddUser = () => {
     "Update Subscriptions",
   ]);
 
+  const selectedMovies = hasAllPermissions(values.permissions, [
+    "Create Movies",
+    "Delete Movies",
+    "Update Movies",
+  ]);
+
   useEffect(() => {
     if (
       selectedSubscriptions &&
@@ -68,12 +74,6 @@ const AddUser = () => {
       });
     }
   }, [selectedSubscriptions]);
-
-  const selectedMovies = hasAllPermissions(values.permissions, [
-    "Create Movies",
-    "Delete Movies",
-    "Update Movies",
-  ]);
 
   useEffect(() => {
     if (selectedMovies && !values.permissions.includes("View Movies")) {

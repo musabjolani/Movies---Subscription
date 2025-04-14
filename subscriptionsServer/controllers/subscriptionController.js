@@ -1,5 +1,6 @@
 const express = require("express");
 const subscriptionServ = require("../services/subscriptionServ");
+const { permissionMiddleware } = require("../middleware/permissionMiddleware ");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -17,13 +18,17 @@ router.get("/getAllMembersWithMovies", async (req, res) => {
     res.json(res.status(404).json(error.message));
   }
 });
-router.get("/getAllMoviesWithMembers", async (req, res) => {
-  try {
-    res.json(await subscriptionServ.getAllMoviesWithMembers());
-  } catch (error) {
-    res.json(res.status(404).json(error.message));
+router.get(
+  "/getAllMoviesWithMembers",
+  permissionMiddleware("View Movies"),
+  async (req, res) => {
+    try {
+      res.json(await subscriptionServ.getAllMoviesWithMembers());
+    } catch (error) {
+      res.json(res.status(404).json(error.message));
+    }
   }
-});
+);
 
 router.get("/:id", async (req, res) => {
   try {
@@ -72,6 +77,14 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const subscription = req.body;
     res.json(await subscriptionServ.updateSub(id, subscription));
+  } catch (error) {
+    res.json(res.status(404).json(error.message));
+  }
+});
+router.delete("/removemoviefromsubscription/:movieId", async (req, res) => {
+  try {
+    const { movieId } = req.params;
+    res.json(await subscriptionServ.deleteMoviesFromSubscription(movieId));
   } catch (error) {
     res.json(res.status(404).json(error.message));
   }

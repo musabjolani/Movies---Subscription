@@ -108,6 +108,10 @@ const deleteSubscription = (id) => {
   return subscriptionRep.deleteSubscription(id);
 };
 
+const deleteMoviesFromSubscription = (moveiId) => {
+  return subscriptionRep.deleteMoviesFromSubscription(moveiId);
+};
+
 module.exports = {
   getAllSubscriptions,
   getSubscriptionByID,
@@ -118,5 +122,6 @@ module.exports = {
   addSubscription,
   addMovieToSubscription,
   updateSubscription,
+  deleteMoviesFromSubscription,
   deleteSubscription,
 };

@@ -7,8 +7,8 @@ import Header from "./Header";
 
 const MainPage = () => {
   const initialMenuItems = [
-    { title: "Movies", navigate: "/movies" },
-    { title: "Subscriptions", navigate: "/subscriptions" },
+    { title: "Movies", navigate: "/movies/allmovies" },
+    { title: "Subscriptions", navigate: "/subscriptions/allmembers" },
     { title: "Users Management", navigate: "/usersmanagement/allusers" },
     { title: "LogOut", navigate: "/logout" },
   ];
@@ -19,7 +19,9 @@ const MainPage = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data: loggedUser } = await getLoggedUserDetails();
+        const { data: loggedUser } = await getAll(
+          "userDB/getLoggedUserDetails"
+        );
 
         if (!loggedUser) {
           console.error("User data not found");
@@ -28,6 +30,7 @@ const MainPage = () => {
         setUser(loggedUser);
       } catch (error) {
         console.error("Error fetching user details:", error);
+        // throw error;
       }
     };
 
@@ -36,7 +39,7 @@ const MainPage = () => {
 
   useEffect(() => {
     setMenuItems(initialMenuItems);
-    if (!user?.user?.isAdmin) {
+    if (!user?.isAdmin) {
       setMenuItems((prevMenu) =>
         prevMenu.filter((item) => item.title !== "Users Management")
       );

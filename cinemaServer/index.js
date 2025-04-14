@@ -15,7 +15,7 @@ app.use("/", express.json());
 connectDB();
 
 app.use((req, res, next) => {
-  const excludedRoutes = ["/userDB/login"]; // Define routes to exclude
+  const excludedRoutes = ["/userDB/login", "/userDB/register"]; // Define routes to exclude
   if (excludedRoutes.includes(req.path)) {
     return next(); // Skip authMiddleware
   }

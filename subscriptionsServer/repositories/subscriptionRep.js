@@ -107,67 +107,51 @@ const getAllMoviesWithMembers = async () => {
     const movies = await Movie.aggregate([
       {
         $lookup: {
-          from: "subscriptions", // Joins with subscriptions collection
-          localField: "_id",
-          foreignField: "movies.movieId",
-          as: "subscriptions",
-        },
-      },
-      {
-        $unwind: {
-          path: "$subscriptions",
-          preserveNullAndEmptyArrays: true, // Keep movies even if they have no subscriptions
-        },
-      },
-      {
-        $unwind: {
-          path: "$subscriptions.movies", // Unwind movies array inside subscriptions
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $match: {
-          $expr: { $eq: ["$subscriptions.movies.movieId", "$_id"] },
-        },
-      },
-      {
-        $lookup: {
-          from: "members", // Joins with members collection
-          localField: "subscriptions.memberId",
-          foreignField: "_id",
+          from: "subscriptions",
+          let: { movieId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$$movieId", "$movies.movieId"],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "members",
+                localField: "memberId",
+                foreignField: "_id",
+                as: "memberDetails",
+              },
+            },
+            {
+              $unwind: "$memberDetails",
+            },
+            {
+              $project: {
+                _id: 0,
+                memberId: "$memberDetails._id",
+                name: "$memberDetails.name",
+                email: "$memberDetails.email",
+                city: "$memberDetails.city",
+              },
+            },
+          ],
           as: "subscribedMembers",
         },
       },
       {
-        $unwind: {
-          path: "$subscribedMembers",
-          preserveNullAndEmptyArrays: true,
+        $addFields: {
+          subscribersCount: { $size: "$subscribedMembers" },
         },
+      },
+      {
+        $sort: { subscribersCount: -1 },
       },
       {
         $project: {
-          _id: 1,
-          name: 1,
-          genres: 1,
-          image: 1,
-          premiered: 1,
-          subscribedMembers: {
-            _id: "$subscribedMembers._id",
-            name: "$subscribedMembers.name",
-            email: "$subscribedMembers.email",
-            city: "$subscribedMembers.city",
-            subscriptionDate: "$subscriptions.movies.date", // Extract subscription date
-          },
-        },
-      },
-      {
-        $group: {
-          _id: "$_id",
-          name: { $first: "$name" },
-          genres: { $first: "$genres" },
-          image: { $first: "$image" },
-          premiered: { $first: "$premiered" },
-          subscribedMembers: { $push: "$subscribedMembers" },
+          subscribersCount: 0, // Optional: remove count field from final output
         },
       },
     ]);
@@ -204,6 +188,19 @@ const updateSubscription = async (id, subscription) => {
   await Subscription.findByIdAndUpdate(id, subscription);
   return "Subscription Updated";
 };
+
+const deleteMoviesFromSubscription = async (movieIdToRemove) => {
+  await Subscription.updateMany(
+    {},
+    {
+      $pull: {
+        movies: { movieId: movieIdToRemove }, // movieIdToRemove is an ObjectId
+      },
+    }
+  );
+  return "All Movies are deleted from the Subscriptions";
+};
+
 const deleteSubscription = async (id) => {
   await Subscription.findByIdAndDelete(id);
   return "Subscription Deleted";
@@ -218,5 +215,6 @@ module.exports = {
   getAllMembersWithMovies,
   addSubscription,
   updateSubscription,
+  deleteMoviesFromSubscription,
   deleteSubscription,
 };
