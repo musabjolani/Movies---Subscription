@@ -3,7 +3,10 @@ const filePath = "./data/Users.json";
 const { v4: uuidv4 } = require("uuid");
 
 const getAllUsers = async () => {
-  return await fileJSONRep.getAllFileData(filePath);
+  const users = await fileJSONRep.getAllFileData(filePath);
+
+  // no need to return the Admin User
+  return users.filter((u) => u.id !== process.env.SYSADMIN_ID);
 };
 const getUserByID = async (id) => {
   const users = await fileJSONRep.getAllFileData(filePath);

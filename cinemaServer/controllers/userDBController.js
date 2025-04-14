@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const userDBServ = require("../services/userDBServ");
-const bcrypt = require("bcrypt");
 
 router.get("/", async (req, res) => {
   try {
@@ -12,7 +11,23 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/getLoggedUserDetails", (req, res) => {
-  res.json({ user: req.user });
+  try {
+    const authHeader = req.headers.Authorization || req.headers.authorization;
+    if (!authHeader) {
+      return res
+        .status(401)
+        .header("x-unauth-reason", "invalid-token")
+        .json({ message: "Unauthorized" });
+    }
+
+    res.json(userDBServ.getLoggedUserDetails(authHeader));
+  } catch (error) {
+    res
+      .status(401)
+      .header("x-unauth-reason", "invalid-token")
+      .header("Access-Control-Expose-Headers", "x-unauth-reason")
+      .json({ message: `Invalid varifyToken ++ :${error.message}` });
+  }
 });
 
 router.get("/:userId", async (req, res) => {
@@ -52,15 +67,9 @@ module.exports = router;
 router.post("/register", async (req, res) => {
   try {
     const { userName, password } = req.body;
-    const user = await userDBServ.getUserAuth(userName);
-    if (!user)
-      return res.status(401).json({ message: "userName ia not exist" });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    res.json(
-      await userDBServ.updateUserByID(user._id, { password: hashedPassword })
-    );
+    return res.json(await userDBServ.register(userName, password));
   } catch (error) {
-    res.status(500).json(error.message);
+    return res.status(500).json({ message: error.message });
   }
 });
 

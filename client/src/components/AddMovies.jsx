@@ -11,6 +11,7 @@ const AddMovies = () => {
     genres: "",
     image: "",
     premiered: "",
+    genresString: "",
   };
 
   const {

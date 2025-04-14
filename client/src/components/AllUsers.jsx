@@ -54,16 +54,15 @@ const AllUsers = () => {
     try {
       e.preventDefault();
       if (confirm("Are tou sure you want to delete the User ?")) {
+        await deleteById(`/userDB/${id}`);
         await deleteById(`/users/${id}`);
         await deleteById(`/permissions/${id}`);
-        await deleteById(`/userDB/${id}`);
         getAllUsers();
       }
-      // setSuccessMessage("The User Deleted Successfully ");
     } catch (error) {
-      // setErrorMessage(
-      //   error.response ? error.response.data.message : error.message
-      // );
+      setErrorMessage(
+        error.response ? error.response.data.message : error.message
+      );
     }
   };
   return (

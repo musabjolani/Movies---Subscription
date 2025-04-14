@@ -20,6 +20,12 @@ const getUserAuth = (userName) => {
   return CinemaDBRep.getUserAuth(userName);
 };
 
+const getLoggedUserDetails = (authHeader) => {
+  const token = authHeader.split(" ")[1];
+  if (!token) throw Error({ message: "Invalid Token" });
+  return jwt.verify(token, process.env.JWT_SECRET_KEY);
+};
+
 const login = async (userName, password) => {
   try {
     // Handle SYSAdmin login (Hardcoded Admin Credentials - Ideally store securely)
@@ -85,10 +91,23 @@ const login = async (userName, password) => {
         expiresIn: "1h",
       }
     );
-    console.log(token);
     return token;
   } catch (error) {
     console.error("Login error:", error);
+    throw error;
+  }
+};
+
+const register = async (userName, password) => {
+  try {
+    const user = await getUserAuth(userName);
+    if (!user) throw new Error("userName ia not exist");
+    const hashedPassword = await bcrypt.hash(password, 10);
+    return await updateUserByID(user._id, {
+      password: hashedPassword,
+    });
+  } catch (error) {
+    console.error("Register error:", error);
     throw error;
   }
 };
@@ -108,7 +127,7 @@ const updateUserByUserId = async (userId, user) => {
 const deleteUserByUserId = async (userId) => {
   const existingUser = await getUserByUserId(userId);
   if (existingUser?._id) return CinemaDBRep.deleteUser(existingUser._id);
-  throw error;
+  //throw error;
 };
 
 module.exports = {
@@ -116,7 +135,9 @@ module.exports = {
   getUserByID,
   getUserByUserId,
   getUserAuth,
+  getLoggedUserDetails,
   addUser,
+  register,
   login,
   updateUserByID,
   updateUserByUserId,

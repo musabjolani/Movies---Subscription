@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const usersJSONServ = require("../services/usersJSONServ");
 const { authMiddleware } = require("../middleware/authMiddleware");
-const { rolesMiddleware } = require("../middleware/rolesMiddleware");
+const { adminMiddleware } = require("../middleware/adminMiddleware");
 
-router.get("/", authMiddleware, rolesMiddleware(), async (req, res) => {
+router.get("/", adminMiddleware(), async (req, res) => {
   try {
     res.json(await usersJSONServ.getAllUsers());
   } catch (error) {
@@ -21,7 +21,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", authMiddleware, rolesMiddleware(), async (req, res) => {
+router.post("/", authMiddleware, adminMiddleware(), async (req, res) => {
   try {
     const user = req.body;
     res.json(await usersJSONServ.addUser(user));

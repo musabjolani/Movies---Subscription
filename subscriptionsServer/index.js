@@ -4,6 +4,7 @@ const connectDB = require("./config/db");
 const memeberController = require("./controllers/memeberController");
 const movieController = require("./controllers/movieController");
 const subscriptionController = require("./controllers/subscriptionController");
+const { authMiddleware } = require("./middleware/authMiddleware");
 
 const PORT = process.env.PORT;
 const app = express();
@@ -16,6 +17,13 @@ app.use("/movies", movieController);
 app.use("/subscriptions", subscriptionController);
 
 connectDB();
+app.use((req, res, next) => {
+  const excludedRoutes = []; // Define routes to exclude
+  if (excludedRoutes.includes(req.path)) {
+    return next(); // Skip authMiddleware
+  }
+  authMiddleware(req, res, next);
+});
 
 app.listen(PORT, () => {
   console.log(`app is listening at http://localhost:${PORT}`);

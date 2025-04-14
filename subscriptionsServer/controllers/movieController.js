@@ -1,5 +1,6 @@
 const express = require("express");
 const movieServ = require("../services/movieServ");
+const { permissionMiddleware } = require("../middleware/permissionMiddleware ");
 const router = express.Router();
 
 router.get("/", async (req, res) => {

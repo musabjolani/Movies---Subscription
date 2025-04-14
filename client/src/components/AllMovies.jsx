@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { deleteById, getAll } from "../Utils/dbUtilsForSubscriptionsService";
 import { useNavigate } from "react-router";
 import { useOutletContext } from "react-router-dom";
+import { getLoggedUserDetails } from "../Utils/dbUtilsForCinemaService";
 import { Link } from "react-router-dom";
 import {
   Alert,
@@ -21,6 +22,8 @@ const AllMovies = () => {
   const labelWidth = "120px";
   const [movies, setMovies] = useState([]);
   const [search] = useOutletContext();
+  const [user, setUser] = useState({ permissions: [] });
+
   const getAllMovies = async () => {
     try {
       const { data: movies } = await getAll(
@@ -32,8 +35,22 @@ const AllMovies = () => {
     }
   };
 
+  const getUser = async () => {
+    try {
+      const { data: loggedUser } = await getLoggedUserDetails();
+      if (!loggedUser) {
+        console.error("User data not found  In Movies");
+        return;
+      }
+      setUser(loggedUser);
+    } catch (error) {
+      console.error("Error fetching user details:  In Movies", error);
+    }
+  };
+
   useEffect(() => {
     getAllMovies();
+    getUser();
   }, []);
 
   const filteredMovies = useMemo(() => {
@@ -48,15 +65,15 @@ const AllMovies = () => {
       e.preventDefault();
       if (confirm("Are tou sure you want to delete the Movie ?")) {
         await deleteById(`/movies/${id}`);
-        await deleteById(`/permissions/${id}`);
-        await deleteById(`/userDB/${id}`);
+        await deleteById(`subscriptions/removemoviefromsubscription/${id}`);
+
         getAllMovies();
       }
-      // setSuccessMessage("The User Deleted Successfully ");
+      setSuccessMessage("The User Deleted Successfully ");
     } catch (error) {
-      // setErrorMessage(
-      //   error.response ? error.response.data.message : error.message
-      // );
+      setErrorMessage(
+        error.response ? error.response.data.message : error.message
+      );
     }
   };
   return (
@@ -94,6 +111,7 @@ const AllMovies = () => {
                       display: "flex",
                       border: "2px solid black",
                       minHeight: "100px",
+                      minWidth: "200px",
                     }}
                   >
                     <Typography
@@ -104,49 +122,67 @@ const AllMovies = () => {
                         position: "absolute",
                       }}
                     >
-                      Subscriptions Watched
+                      Subscriptions Watched :
                     </Typography>
-                    <ul>
-                      {movie.subscribedMembers.map((member) => (
-                        <li>
-                          {" "}
-                          <Link to={`/movies/allmovies`}>
+                    {movie.subscribedMembers.length === 0 ? (
+                      <Typography
+                        sx={{
+                          mt: 5,
+                          fontSize: 15,
+                          fontWeight: "bold",
+                          ml: 1,
+                          position: "absolute",
+                        }}
+                      >
+                        No Subscribed Members
+                      </Typography>
+                    ) : (
+                      <ul>
+                        {movie.subscribedMembers.map((member) => (
+                          <li key={member.name}>
                             {" "}
-                            {`${member.name} ,${new Date(
-                              member.subscriptionDate
-                            ).toLocaleDateString("en-GB")}`}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
+                            <Link to={`/subscriptions/allmembers`}>
+                              {" "}
+                              {`${member.name} ,${new Date(
+                                member.subscriptionDate
+                              ).toLocaleDateString("en-GB")}`}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </Box>
                 </Box>
               </Stack>
             </CardContent>
             <CardActions>
               <Box sx={{ display: "inline-block" }}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  type="submit"
-                  sx={{
-                    width: "80px",
-                    mr: 1,
-                  }}
-                  onClick={() => navigate(`/movies/updatemovie/${movie._id}`)}
-                >
-                  Update
-                </Button>
-                <Button
-                  variant="contained"
-                  size="large"
-                  sx={{
-                    width: "80px",
-                  }}
-                  onClick={(e) => handleDeleteMovie(e, user.id)}
-                >
-                  Delete
-                </Button>
+                {user.permissions.includes("Update Movies") && (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    type="submit"
+                    sx={{
+                      width: "80px",
+                      mr: 1,
+                    }}
+                    onClick={() => navigate(`/movies/updatemovie/${movie._id}`)}
+                  >
+                    Update
+                  </Button>
+                )}
+                {user.permissions.includes("Delete Movies") && (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    sx={{
+                      width: "80px",
+                    }}
+                    onClick={(e) => handleDeleteMovie(e, movie._id)}
+                  >
+                    Delete
+                  </Button>
+                )}
               </Box>
             </CardActions>
           </Card>

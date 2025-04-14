@@ -39,14 +39,14 @@ const Register = () => {
   );
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data } = await getLoggedUserDetails();
-        setValues({ ...values, userName: data?.user?.userName });
-        setIsAdmin(data?.user?.isAdmin);
-      } catch (error) {}
-    };
-    getUser();
+    // const getUser = async () => {
+    //   try {
+    //     const { data } = await getLoggedUserDetails();
+    //     setValues({ ...values, userName: data?.user?.userName });
+    //     setIsAdmin(data?.user?.isAdmin);
+    //   } catch (error) {}
+    // };
+    //  getUser();
   }, []);
 
   const registerUser = async (e) => {
@@ -58,13 +58,7 @@ const Register = () => {
       if (errors && Object.keys(errors).length > 0) {
         return;
       }
-
-      await postData(
-        `/userDB/register`,
-
-        values
-      );
-
+      await postData(`/userDB/register`, values);
       setErrorMessage("");
       setSuccessMessage("The password reset Successfully ");
     } catch (error) {
@@ -100,7 +94,6 @@ const Register = () => {
                 value={values.userName}
                 label="User Name"
                 variant="outlined"
-                disabled={!isAdmin}
                 onChange={(e) => handleInputChange(e)}
                 {...(isFormSubmitted &&
                   errors.userName && {

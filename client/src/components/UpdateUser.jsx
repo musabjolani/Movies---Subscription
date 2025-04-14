@@ -51,9 +51,9 @@ const UpdateUser = () => {
         );
 
         setValues({
-          ...user?.[0], // Ensure user data exists
-          userName: userDb?.userName || "", // Avoid undefined
-          permissions: userPermissions?.[0]?.permissions || [], // Default empty array
+          ...user,
+          userName: userDb ? userDb.userName : "",
+          permissions: userPermissions?.permissions || [],
         });
       } catch (error) {
         setErrorMessage(

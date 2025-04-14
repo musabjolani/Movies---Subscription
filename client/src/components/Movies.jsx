@@ -1,20 +1,54 @@
 import { Box, Button, TextField } from "@mui/material";
 import ButtonsMenu from "./ButtonsMenu";
 import { Outlet, useLocation } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
+import { getLoggedUserDetails } from "../Utils/dbUtilsForCinemaService";
 
 const Movies = () => {
   const [search, setSearch] = useState("");
   const [searchText, setSearchText] = useState("");
-  const Menuitems = [
+  const [user, setUser] = useState({ permissions: [] });
+
+  const initialMenuItems = [
     { title: "All Movies", navigate: "allmovies" },
     { title: "Add Movie", navigate: "addmovie" },
   ];
+  const [menuItems, setMenuItems] = useState(initialMenuItems);
+
   const location = useLocation();
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data: loggedUser } = await getLoggedUserDetails();
+        if (!loggedUser) {
+          console.error("User data not found  In Movies");
+          return;
+        }
+        setUser(loggedUser);
+      } catch (error) {
+        console.error("Error fetching user details:  In Movies", error);
+      }
+    };
+
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    setMenuItems(initialMenuItems);
+
+    if (!user?.permissions.includes("View Movies"))
+      setMenuItems((prevMenu) =>
+        prevMenu.filter((item) => item.title !== "All Movies")
+      );
+    if (!user?.permissions.includes("Create Movies"))
+      setMenuItems((prevMenu) =>
+        prevMenu.filter((item) => item.title !== "Add Movie")
+      );
+  }, [user]);
 
   // Check if current route is `/movies/allmovies`
-  const showSearch = location.pathname === "/movies/allmovies";
+
   const findButtonRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -43,9 +77,9 @@ const Movies = () => {
         }}
       >
         <Box>
-          <ButtonsMenu items={Menuitems}></ButtonsMenu>
+          <ButtonsMenu items={menuItems}></ButtonsMenu>
         </Box>
-        {showSearch && (
+        {location.pathname === "/movies/allmovies" && (
           <Box sx={{ display: "flex", alignItems: "flex-end", mr: 1, gap: 2 }}>
             <TextField
               id="input-with-sx"

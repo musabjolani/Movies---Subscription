@@ -13,9 +13,7 @@ const Header = ({ user }) => {
             }}
           >
             <Typography variant="subtitle2">
-              {`Hi, ${user?.user?.firstName || "Guest"}  ${
-                user?.user?.lastName
-              } `}
+              {`Hi, ${user?.firstName || "Guest"}  ${user?.lastName} `}
             </Typography>
           </Box>
         </Toolbar>
