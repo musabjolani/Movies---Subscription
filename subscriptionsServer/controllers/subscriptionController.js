@@ -11,13 +11,17 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/getAllMembersWithMovies", async (req, res) => {
-  try {
-    res.json(await subscriptionServ.getAllMembersWithMovies());
-  } catch (error) {
-    res.json(res.status(404).json(error.message));
+router.get(
+  "/getAllMembersWithMovies",
+  permissionMiddleware("View Subscriptions"),
+  async (req, res) => {
+    try {
+      res.json(await subscriptionServ.getAllMembersWithMovies());
+    } catch (error) {
+      res.json(res.status(404).json(error.message));
+    }
   }
-});
+);
 router.get(
   "/getAllMoviesWithMembers",
   permissionMiddleware("View Movies"),
@@ -29,6 +33,14 @@ router.get(
     }
   }
 );
+router.get("/getUnsubscribedMovies/:memberId", async (req, res) => {
+  try {
+    const { memberId } = req.params;
+    res.json(await subscriptionServ.getUnsubscribedMovies(memberId));
+  } catch (error) {
+    res.json(res.status(404).json(error.message));
+  }
+});
 
 router.get("/:id", async (req, res) => {
   try {

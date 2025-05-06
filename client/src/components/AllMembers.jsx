@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import useForm from "../hooks/useForm";
 import { localStringToDate } from "../Utils/utilities";
+import { getLoggedUserDetails } from "../Utils/dbUtilsForCinemaService";
 
 const AllMembers = () => {
   let navigate = useNavigate();
@@ -42,6 +43,7 @@ const AllMembers = () => {
   const [memberIdToAdd, setMemberIdToAdd] = useState(-1);
   const [selectedMovieName, setSelectedMovieName] = useState("");
   const [movies, setMovies] = useState([]);
+  const [user, setUser] = useState({ permissions: [] });
   const [errorMessage, setErrorMessage] = useState("");
   //React API
 
@@ -85,12 +87,28 @@ const AllMembers = () => {
   //     console.log(error);
   //   }
   // };
-
-  const getAllMovies = async (memberId) => {
+  const getUser = async () => {
     try {
+      return; // for testing only
+      // const { data: loggedUser } = await getLoggedUserDetails();
+      const loggedUser = await getLoggedUserDetails();
+      if (!loggedUser) {
+        return;
+      }
+      setUser(loggedUser.data);
+    } catch (error) {
+      console.error("Error fetching user details:  In All Members", error);
+    }
+  };
+
+  const getUnsubscribedMovies = async (memberId) => {
+    try {
+      resetForm();
       setMemberIdToAdd(memberId);
       if (movies && movies.length > 0) return; // if movies already fetched, return
-      const { data: moviesData } = await getAll(`/movies`);
+      const { data: moviesData } = await getAll(
+        `subscriptions/getUnsubscribedMovies/${memberId}`
+      );
       setMovies(moviesData);
     } catch (error) {
       console.log(error);
@@ -98,6 +116,7 @@ const AllMembers = () => {
   };
   useEffect(() => {
     getAllMembers();
+    getUser();
   }, []);
 
   const handleAddMovieToSubscription = async (memberId) => {
@@ -121,7 +140,7 @@ const AllMembers = () => {
         }
       );
 
-      let indx = members.findIndex((member) => member._id === memberId);
+      let indx = members.findIndex((member) => member.memberId === memberId);
 
       if (indx !== -1) {
         // Ensure the member is found
@@ -151,27 +170,29 @@ const AllMembers = () => {
     }
   };
 
-  const handleDeleteMovie = async (e, id) => {
+  const handleDeleteMember = async (e, id) => {
     try {
       e.preventDefault();
-      if (confirm("Are tou sure you want to delete the Movie ?")) {
-        await deleteById(`/movies/${id}`);
-        await deleteById(`/permissions/${id}`);
-        await deleteById(`/userDB/${id}`);
-        getAllMovies();
+      if (
+        confirm(
+          "Are tou sure you want to delete the Member from Subscriptions”?"
+        )
+      ) {
+        await deleteById(`/subscriptions/${id}`);
+        // setMembers(members.filter((member) => member.subscriptionId !== id));
+        await getAllMembers();
       }
-      // setSuccessMessage("The User Deleted Successfully ");
     } catch (error) {
-      // setErrorMessage(
-      //   error.response ? error.response.data.message : error.message
-      // );
+      setErrorMessage(
+        error.response ? error.response.data.message : error.message
+      );
     }
   };
   return (
     <>
       {members &&
         members.map((member) => (
-          <Box key={member._id} sx={{ border: "2px solid black", mt: 2 }}>
+          <Box key={member.memberId} sx={{ border: "2px solid black", mt: 2 }}>
             <Box sx={{ ml: 1 }}>
               <Typography variant="h4" sx={{ fontSize: 22, mt: 1, mb: 1 }}>
                 {" "}
@@ -206,33 +227,37 @@ const AllMembers = () => {
               </Box>
             </Box>
             <Box sx={{ display: "inline-block", ml: 1 }}>
-              <Button
-                variant="contained"
-                size="large"
-                type="submit"
-                sx={{
-                  width: "80px",
-                  mr: 1,
-                }}
-                onClick={() =>
-                  navigate(`/subscriptions/updatemember/${member._id}`)
-                }
-              >
-                Edit
-              </Button>
-              <Button
-                variant="contained"
-                size="large"
-                sx={{
-                  width: "80px",
-                }}
-                onClick={(e) => handleDeleteMovie(e, user.id)}
-              >
-                Delete
-              </Button>
+              {user.permissions.includes("Update Subscriptions") && (
+                <Button
+                  variant="contained"
+                  size="large"
+                  type="submit"
+                  sx={{
+                    width: "80px",
+                    mr: 1,
+                  }}
+                  onClick={() =>
+                    navigate(`/subscriptions/updatemember/${member.memberId}`)
+                  }
+                >
+                  Edit
+                </Button>
+              )}
+              {user.permissions.includes("Delete Subscriptions") && (
+                <Button
+                  variant="contained"
+                  size="large"
+                  sx={{
+                    width: "80px",
+                  }}
+                  onClick={(e) => handleDeleteMember(e, member.subscriptionId)}
+                >
+                  Delete
+                </Button>
+              )}
             </Box>
             <Box
-              key={member._id}
+              key={member.memberId}
               sx={{ border: "2px solid black", mt: 2, ml: 1, width: "85%" }}
             >
               <Typography
@@ -248,13 +273,13 @@ const AllMembers = () => {
                   size="medium"
                   color="secondary"
                   onClick={() => {
-                    getAllMovies(member._id);
+                    getUnsubscribedMovies(member.memberId);
                   }}
                 >
                   Subscripe to a new Movie
                 </Button>
               </Box>
-              {memberIdToAdd === member._id && (
+              {memberIdToAdd === member.memberId && (
                 <Box
                   sx={{ border: "2px solid red", mt: 2, ml: 1, width: "90%" }}
                 >
@@ -275,7 +300,13 @@ const AllMembers = () => {
                         name="movieId"
                         label="Movies"
                         size="small"
-                        value={movies.length > 0 ? movies[0]._id : ""}
+                        value={
+                          values.movieId != ""
+                            ? values.movieId
+                            : movies[0]
+                            ? movies[0]._id
+                            : ""
+                        }
                         onChange={(e) => {
                           setSelectedMovieName(
                             movies.find((movie) => movie._id === e.target.value)
@@ -314,7 +345,7 @@ const AllMembers = () => {
                       variant="contained"
                       size="medium"
                       onClick={() => {
-                        handleAddMovieToSubscription(member._id);
+                        handleAddMovieToSubscription(member.memberId);
                       }}
                     >
                       Subscripe
@@ -325,11 +356,11 @@ const AllMembers = () => {
                   )}
                 </Box>
               )}
-              <ul key={member._id}>
+              <ul key={member.memberId}>
                 {member.movies &&
                   member.movies.map((movie) => (
                     <li key={movie._id}>
-                      <Link to={`/movies/allmovies`}>
+                      <Link to={`/movies/allmovies/?movieName=${movie.name}`}>
                         {" "}
                         {`${movie.name},${new Date(
                           movie.premiered

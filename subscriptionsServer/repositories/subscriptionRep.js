@@ -11,6 +11,25 @@ const getSubscriptionByID = async (id) => {
   return [];
 };
 
+const getUnsubscribedMovies = async (memberId) => {
+  try {
+    const subscription = await Subscription.findOne({ memberId });
+
+    const subscribedMovieIds = subscription
+      ? subscription.movies.map((movie) => movie.movieId)
+      : [];
+
+    const unsubscribedMovies = await Movie.find({
+      _id: { $nin: subscribedMovieIds },
+    }).sort({ name: 1 }); // Sort by name ASC
+
+    return unsubscribedMovies;
+  } catch (error) {
+    console.error("Error fetching unsubscribed movies:", error.message);
+    throw error;
+  }
+};
+
 //With Maps
 // const getAllMembersWithMovies = async () => {
 //   try {
@@ -50,20 +69,23 @@ const getSubscriptionByID = async (id) => {
 const getAllMembersWithMovies = async () => {
   try {
     const members = await Member.aggregate([
+      // 1. Lookup subscriptions
       {
         $lookup: {
-          from: "subscriptions", // Collection name in MongoDB
+          from: "subscriptions",
           localField: "_id",
           foreignField: "memberId",
           as: "subscriptions",
         },
       },
+      // 2. Unwind subscriptions array (optional: preserve if no subscription)
       {
         $unwind: {
           path: "$subscriptions",
-          preserveNullAndEmptyArrays: true, // Keep members even if they have no subscriptions
+          preserveNullAndEmptyArrays: true,
         },
       },
+      // 3. Lookup movies from Movie collection
       {
         $lookup: {
           from: "movies",
@@ -72,9 +94,12 @@ const getAllMembersWithMovies = async () => {
           as: "movies",
         },
       },
+      // 4. Project the final structure
       {
         $project: {
-          _id: 1,
+          _id: 0, // hide internal _id if you want
+          subscriptionId: "$subscriptions._id",
+          memberId: "$_id",
           name: 1,
           email: 1,
           city: 1,
@@ -213,6 +238,7 @@ module.exports = {
   getSubscriptionByMember,
   getAllMoviesWithMembers,
   getAllMembersWithMovies,
+  getUnsubscribedMovies,
   addSubscription,
   updateSubscription,
   deleteMoviesFromSubscription,

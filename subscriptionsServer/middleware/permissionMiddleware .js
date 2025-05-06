@@ -1,29 +1,28 @@
-const jwt = require("jsonwebtoken");
-const axios = require("axios");
-
 const permissionMiddleware = (requiredPermission) => {
-  const url = " http://localhost:3300/userDB/getLoggedUserDetails";
   return async (req, res, next) => {
-    const authHeader = req.headers.Authorization || req.headers.authorization;
-    if (!authHeader)
-      return res
-        .status(401)
-        .header("X-Unauth-Reason", "invalid-token")
-        .send({ message: "Unauthorized" });
-
-    const { data: user } = await axios.get(url, {
-      headers: {
-        Authorization: authHeader,
-      },
-    });
-
-    if (!user.permissions || !user.permissions.includes(requiredPermission)) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          message: "Unauthorized permissionMiddleware: No user data found",
+        });
+      }
+      if (req.user.isAdmin) return next(); // Admins have all permissions
+      if (
+        !req.user.permissions ||
+        !req.user.permissions.includes(requiredPermission)
+      ) {
+        return res
+          .status(403)
+          .header("Access-Control-Expose-Headers", "X-Unauth-Reason")
+          .header("X-Unauth-Reason", "insufficient-permissions")
+          .json({ message: "Access Denied: Insufficient permissions" });
+      }
+      return next();
+    } catch (error) {
       return res
         .status(403)
-        .header("X-Unauth-Reason", "insufficient-permissions")
-        .json({ message: "Access Denied: Insufficient permissions" });
+        .send({ message: `Error permissionMiddleware ${error.r.message}` });
     }
-    return next();
   };
 };
 

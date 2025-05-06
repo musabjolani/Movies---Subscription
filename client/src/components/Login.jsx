@@ -56,11 +56,11 @@ const Login = () => {
       if (logginUser) {
         dispatch(setToken(logginUser.data));
 
-        const { data: loggedUser } = await getLoggedUserDetails();
+        //const { data: loggedUser } = await getLoggedUserDetails();
 
-        if (!loggedUser?.user) {
-          console.error("User data not found");
-        }
+        // if (!loggedUser?.user) {
+        //   console.error("User data not found");
+        // }
 
         // const { data: permissions } = await getAll(
         //   `permissions/${loggedUser.user.userId}`

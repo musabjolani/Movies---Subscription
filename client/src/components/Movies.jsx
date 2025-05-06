@@ -4,11 +4,13 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import { getLoggedUserDetails } from "../Utils/dbUtilsForCinemaService";
+import { useSearchParams } from "react-router-dom";
 
 const Movies = () => {
   const [search, setSearch] = useState("");
   const [searchText, setSearchText] = useState("");
   const [user, setUser] = useState({ permissions: [] });
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const initialMenuItems = [
     { title: "All Movies", navigate: "allmovies" },
@@ -32,6 +34,10 @@ const Movies = () => {
     };
 
     getUser();
+    if (searchParams.get("movieName")) {
+      setSearchText(searchParams.get("movieName"));
+      setSearch(searchParams.get("movieName"));
+    }
   }, []);
 
   useEffect(() => {
@@ -53,6 +59,7 @@ const Movies = () => {
 
   const handleInputChange = (e) => {
     setSearchText(e.target.value);
+    //setSearch(e.target.value);
     if (findButtonRef.current) {
       findButtonRef.current.focus(); //  Focus on the "Find" button
     }
@@ -79,7 +86,7 @@ const Movies = () => {
         <Box>
           <ButtonsMenu items={menuItems}></ButtonsMenu>
         </Box>
-        {location.pathname === "/movies/allmovies" && (
+        {location.pathname.startsWith("/movies/allmovies") && (
           <Box sx={{ display: "flex", alignItems: "flex-end", mr: 1, gap: 2 }}>
             <TextField
               id="input-with-sx"
@@ -87,6 +94,7 @@ const Movies = () => {
               variant="outlined"
               size="small"
               value={searchText}
+              //value={search}
               slotProps={{
                 input: {
                   startAdornment: (

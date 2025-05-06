@@ -12,17 +12,10 @@ router.get("/", async (req, res) => {
 
 router.get("/getLoggedUserDetails", (req, res) => {
   try {
-    const authHeader = req.headers.Authorization || req.headers.authorization;
-    if (!authHeader) {
-      return res
-        .status(401)
-        .header("x-unauth-reason", "invalid-token")
-        .json({ message: "Unauthorized" });
-    }
-
-    res.json(userDBServ.getLoggedUserDetails(authHeader));
+    return res.json(req.user);
   } catch (error) {
-    res
+    console.log("error", error);
+    return res
       .status(401)
       .header("x-unauth-reason", "invalid-token")
       .header("Access-Control-Expose-Headers", "x-unauth-reason")
@@ -57,7 +50,6 @@ router.post("/login", async (req, res) => {
     const { userName, password } = req.body;
     return res.json(await userDBServ.login(userName, password));
   } catch (error) {
-    console.error("Login error:", error);
     return res.status(500).json({ message: error.message });
   }
 });

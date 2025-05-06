@@ -41,7 +41,7 @@ function App() {
               <Route path="allmovies" element={<AllMovies />}></Route>
             </Route>
             <Route path="subscriptions" element={<Subscriptions />}>
-              <Route path="addmovie" element={<AddMovies />}></Route>
+              <Route path="addmember" element={<AddUser />}></Route>
               <Route
                 path="updatemovie/:movieId"
                 element={<UpdateMovie />}

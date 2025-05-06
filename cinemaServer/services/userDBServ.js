@@ -20,12 +20,6 @@ const getUserAuth = (userName) => {
   return CinemaDBRep.getUserAuth(userName);
 };
 
-const getLoggedUserDetails = (authHeader) => {
-  const token = authHeader.split(" ")[1];
-  if (!token) throw Error({ message: "Invalid Token" });
-  return jwt.verify(token, process.env.JWT_SECRET_KEY);
-};
-
 const login = async (userName, password) => {
   try {
     // Handle SYSAdmin login (Hardcoded Admin Credentials - Ideally store securely)
@@ -135,7 +129,6 @@ module.exports = {
   getUserByID,
   getUserByUserId,
   getUserAuth,
-  getLoggedUserDetails,
   addUser,
   register,
   login,
