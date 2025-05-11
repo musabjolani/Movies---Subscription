@@ -8,6 +8,10 @@ const getSubscriptionByID = (id) => {
   return subscriptionRep.getSubscriptionByID(id);
 };
 
+const getUnsubscribedMovies = (memberid) => {
+  return subscriptionRep.getUnsubscribedMovies(memberid);
+};
+
 const getAllMembersWithMovies = () => {
   return subscriptionRep.getAllMembersWithMovies();
 };
@@ -119,6 +123,8 @@ module.exports = {
   getMembersByMovies,
   getAllMembersWithMovies,
   getAllMoviesWithMembers,
+  getUnsubscribedMovies,
+
   addSubscription,
   addMovieToSubscription,
   updateSubscription,

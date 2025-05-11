@@ -1,5 +1,6 @@
 const express = require("express");
 const memberServ = require("../services/memberServ");
+const { permissionMiddleware } = require("../middleware/permissionMiddleware ");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -43,22 +44,30 @@ router.post("/", async (req, res) => {
     res.json(res.status(404).json(error.message));
   }
 });
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const member = req.body;
-    res.json(await memberServ.updateMember(id, member));
-  } catch (error) {
-    res.json(res.status(404).json(error.message));
+router.put(
+  "/:id",
+  permissionMiddleware("Update Subscriptions"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const member = req.body;
+      res.json(await memberServ.updateMember(id, member));
+    } catch (error) {
+      res.json(res.status(404).json(error.message));
+    }
   }
-});
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    res.json(await memberServ.deleteMember(id));
-  } catch (error) {
-    res.json(res.status(404).json(error.message));
+);
+router.delete(
+  "/:id",
+  permissionMiddleware("Delete Subscriptions"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      res.json(await memberServ.deleteMember(id));
+    } catch (error) {
+      res.json(res.status(404).json(error.message));
+    }
   }
-});
+);
 
 module.exports = router;

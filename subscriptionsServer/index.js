@@ -12,11 +12,6 @@ const app = express();
 app.use(cors());
 app.use("/", express.json());
 
-app.use("/members", memeberController);
-app.use("/movies", movieController);
-app.use("/subscriptions", subscriptionController);
-
-connectDB();
 app.use((req, res, next) => {
   const excludedRoutes = []; // Define routes to exclude
   if (excludedRoutes.includes(req.path)) {
@@ -24,6 +19,12 @@ app.use((req, res, next) => {
   }
   authMiddleware(req, res, next);
 });
+
+app.use("/members", memeberController);
+app.use("/movies", movieController);
+app.use("/subscriptions", subscriptionController);
+
+connectDB();
 
 app.listen(PORT, () => {
   console.log(`app is listening at http://localhost:${PORT}`);

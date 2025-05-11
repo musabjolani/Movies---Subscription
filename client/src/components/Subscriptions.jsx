@@ -1,17 +1,47 @@
 import { Box, Button, TextField } from "@mui/material";
 import ButtonsMenu from "./ButtonsMenu";
-import { Outlet, useLocation } from "react-router-dom";
-import { useRef, useState } from "react";
-import SearchIcon from "@mui/icons-material/Search";
+import { Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getLoggedUserDetails } from "../Utils/dbUtilsForCinemaService";
 
 const Subscriptions = () => {
-  const [search, setSearch] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const Menuitems = [
+  const initialMenuItems = [
     { title: "All Members", navigate: "allmembers" },
-    { title: "Add Members", navigate: "addmembers" },
+    { title: "Add Members", navigate: "addmember" },
   ];
-  const location = useLocation();
+
+  const [user, setUser] = useState({ permissions: [] });
+  const [menuItems, setMenuItems] = useState(initialMenuItems);
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data: loggedUser } = await getLoggedUserDetails();
+        if (!loggedUser) {
+          console.error("User data not found  In Movies");
+          return;
+        }
+        setUser(loggedUser);
+      } catch (error) {
+        console.error("Error fetching user details:  In Movies", error);
+      }
+    };
+
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    setMenuItems(initialMenuItems);
+
+    if (!user?.permissions.includes("View Subscriptions"))
+      setMenuItems((prevMenu) =>
+        prevMenu.filter((item) => item.title !== "All Members")
+      );
+    if (!user?.permissions.includes("Create Subscriptions"))
+      setMenuItems((prevMenu) =>
+        prevMenu.filter((item) => item.title !== "Add Members")
+      );
+  }, [user]);
 
   return (
     <>
@@ -25,7 +55,7 @@ const Subscriptions = () => {
         }}
       >
         <Box>
-          <ButtonsMenu items={Menuitems}></ButtonsMenu>
+          <ButtonsMenu items={menuItems}></ButtonsMenu>
         </Box>
       </Box>
       <Box sx={{ border: "2px solid black", mt: 3 }}>

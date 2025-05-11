@@ -9,28 +9,25 @@ const autherizeRoles = (...allowedRoles) => {
 const adminMiddleware = () => {
   return async (req, res, next) => {
     try {
-      const authHeader = req.headers.Authorization || req.headers.authorization;
-      if (!authHeader)
+      if (!req.user) {
         return res
           .status(401)
-          .header("x-unauth-reason", "invalid-token")
-          .send({ message: "Unauthorized" });
-
-      const user = await getLoggedUserDetails(authHeader);
+          .json({ message: "Unauthorized: No user data found" });
+      }
 
       //  Check if user has the required role
-      if (!user.isAdmin) {
+      if (!req.user.isAdmin) {
         return res
           .status(403)
-          .header("x-unauth-reason", "No-Admin-Permission")
+          .header("Access-Control-Expose-Headers", "X-Unauth-Reason")
+          .header("X-Unauth-Reason", "No-Admin-Permission")
           .send({ message: "Access Denied: No Admin permissions" });
       }
       return next();
     } catch (error) {
       return res
         .status(403)
-        .header("x-unauth-reason", "Admin-Error")
-        .send({ message: error.r.message });
+        .send({ message: `Error inadminMiddleware ${error.r.message}` });
     }
   };
 };
