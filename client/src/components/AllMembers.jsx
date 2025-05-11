@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
-  deleteById,
   getAll,
+  deleteById,
   postData,
 } from "../Utils/dbUtilsForSubscriptionsService";
 import { useNavigate } from "react-router";
@@ -20,6 +20,7 @@ import {
 import useForm from "../hooks/useForm";
 import { localStringToDate } from "../Utils/utilities";
 import { getLoggedUserDetails } from "../Utils/dbUtilsForCinemaService";
+//import { getAll as getLoggedUserDetails } from "../Utils/dbUtilsForCinemaService";
 
 const AllMembers = () => {
   let navigate = useNavigate();
@@ -89,13 +90,13 @@ const AllMembers = () => {
   // };
   const getUser = async () => {
     try {
-      return; // for testing only
-      // const { data: loggedUser } = await getLoggedUserDetails();
-      const loggedUser = await getLoggedUserDetails();
+      const { data: loggedUser } = await getLoggedUserDetails(
+        "userDB/getLoggedUserDetails"
+      );
       if (!loggedUser) {
         return;
       }
-      setUser(loggedUser.data);
+      setUser(loggedUser);
     } catch (error) {
       console.error("Error fetching user details:  In All Members", error);
     }
@@ -129,7 +130,7 @@ const AllMembers = () => {
         return;
       }
 
-      const { data: movieAdded } = await postData(
+      const { data: subscriptionId } = await postData(
         `/subscriptions/addmovietosubscription`,
         {
           memberId: memberId,
@@ -141,26 +142,31 @@ const AllMembers = () => {
       );
 
       let indx = members.findIndex((member) => member.memberId === memberId);
-
+      // Ensure the member is found
       if (indx !== -1) {
-        // Ensure the member is found
-        let membersWithAddedMovie = [...members];
+        let membersWithAddedMovie = [
+          ...members,
+          { subscriptionId: subscriptionId },
+        ];
 
         // Create a new movies array to avoid direct mutation
         let updatedMovies = [
           ...membersWithAddedMovie[indx].movies,
           {
+            _id: values.movieId,
             name: selectedMovieName || "Unknown Movie", // Fallback in case of undefined
             premiered: localStringToDate(values.date),
           },
         ];
+
+        console.log("Updated Movies:", updatedMovies);
 
         // Update the member object
         membersWithAddedMovie[indx] = {
           ...membersWithAddedMovie[indx],
           movies: updatedMovies,
         };
-
+        console.log("Updated Members:", membersWithAddedMovie);
         setMembers(membersWithAddedMovie);
       }
     } catch (error) {
@@ -173,11 +179,13 @@ const AllMembers = () => {
   const handleDeleteMember = async (e, id) => {
     try {
       e.preventDefault();
+
       if (
         confirm(
           "Are tou sure you want to delete the Member from Subscriptions”?"
         )
       ) {
+        if (id === undefined) return;
         await deleteById(`/subscriptions/${id}`);
         // setMembers(members.filter((member) => member.subscriptionId !== id));
         await getAllMembers();

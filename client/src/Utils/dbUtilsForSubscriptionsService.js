@@ -68,8 +68,4 @@ const deleteById = async (url) => {
   await api.delete(url);
 };
 
-const getUserDetails = async () => {
-  return await api.get("/userDB/getUserDetails");
-};
-
-export { getAll, postData, updateById, deleteById, getUserDetails };
+export { getAll, postData, updateById, deleteById };

@@ -51,14 +51,18 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/members/:movieId", async (req, res) => {
-  try {
-    const { movieId } = req.params;
-    res.json(await subscriptionServ.getMembersByMovies(movieId));
-  } catch (error) {
-    res.json(res.status(404).json(error.message));
+router.get(
+  "/members/:movieId",
+
+  async (req, res) => {
+    try {
+      const { movieId } = req.params;
+      res.json(await subscriptionServ.getMembersByMovies(movieId));
+    } catch (error) {
+      res.json(res.status(404).json(error.message));
+    }
   }
-});
+);
 router.get("/movies/:memberId", async (req, res) => {
   try {
     const { memberId } = req.params;
@@ -76,23 +80,31 @@ router.post("/", async (req, res) => {
     res.json(res.status(404).json(error.message));
   }
 });
-router.post("/addmovietosubscription", async (req, res) => {
-  try {
-    const memberWithMovie = req.body;
-    res.json(await subscriptionServ.addMovieToSubscription(memberWithMovie));
-  } catch (error) {
-    res.json(res.status(404).json(error.message));
+router.post(
+  "/addmovietosubscription",
+  permissionMiddleware("Create Subscriptions"),
+  async (req, res) => {
+    try {
+      const memberWithMovie = req.body;
+      res.json(await subscriptionServ.addMovieToSubscription(memberWithMovie));
+    } catch (error) {
+      res.json(res.status(404).json(error.message));
+    }
   }
-});
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const subscription = req.body;
-    res.json(await subscriptionServ.updateSub(id, subscription));
-  } catch (error) {
-    res.json(res.status(404).json(error.message));
+);
+router.put(
+  "/:id",
+
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const subscription = req.body;
+      res.json(await subscriptionServ.updateSub(id, subscription));
+    } catch (error) {
+      res.json(res.status(404).json(error.message));
+    }
   }
-});
+);
 router.delete("/removemoviefromsubscription/:movieId", async (req, res) => {
   try {
     const { movieId } = req.params;

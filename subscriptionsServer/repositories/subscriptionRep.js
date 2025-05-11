@@ -205,8 +205,8 @@ const getMembersByMovies = async (movieId) => {
 
 const addSubscription = async (subscription) => {
   const newSubscription = new Subscription(subscription);
-  await newSubscription.save();
-  return "Subscription Added";
+  const savedSubscription = await newSubscription.save();
+  return savedSubscription._id; // Return the ID of the saved subscription
 };
 
 const updateSubscription = async (id, subscription) => {
